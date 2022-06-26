@@ -1,19 +1,16 @@
 import praw
 import time
 import datetime
+import json
 
-login = open("login", "r").readlines()
-indx = -1
-for i in login:
-    login[indx] = i.strip()
-    indx += 1
+login = json.load(open("login"))
 
 reddit = praw.Reddit(
     user_agent='<Linux>:<reddit-bot>:<v1.0> (by /u/JakeWisconsin)',
-    client_id=login[0],
-    client_secret=login[1],
-    username=login[2],
-    password=login[3]
+    client_id=login["clientid"],
+    client_secret=login["clientsecret"],
+    username=login["username"],
+    password=login["password"]
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
