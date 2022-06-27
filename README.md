@@ -8,11 +8,9 @@ Para os votos contarem, deve ser feito um comentário com a primeira palavra sen
 * NGM: Ninguém é o babaca
 * TEOB: Todo mundo é o babaca
 * INFO: Falta informação.
-</br>
 # 2 Dependências necessárias
 * python 3.7 ou superior
 * praw
-</br>
 # 3 Preparações para rodar </br>
 ## 3.1 Configurando o bot</br>
 Primeiro, vamos instalar as dependências</br>
