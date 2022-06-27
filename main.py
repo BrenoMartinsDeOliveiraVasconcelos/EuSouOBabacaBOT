@@ -30,7 +30,7 @@ INFO - Falta informação
 OS VOTOS SÃO CONTADOS TODO DIA AS 15:07!
 
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
-^(Código fonte será disponibilizado em breve.)
+^([Códiigdo fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))
 """
 counted = 0
 while True:
@@ -42,7 +42,7 @@ while True:
         "TEOB": 0,
         "INFO": 0
     }
-    submissons = reddit.subreddit('EuSOuOBabaca').new(limit=100)
+    submissons = reddit.subreddit('EuSOuOBabacaBOT').new(limit=100)
     time.sleep(5)
     for submission in submissons:
         sublist = open('idlist', 'r').readlines()
