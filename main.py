@@ -42,7 +42,7 @@ while True:
         "TEOB": 0,
         "INFO": 0
     }
-    submissons = reddit.subreddit('EuSOuOBabacaBOT').new(limit=100)
+    submissons = reddit.subreddit('EuSOuOBabaca').new(limit=100)
     time.sleep(5)
     for submission in submissons:
         sublist = open('idlist', 'r').readlines()
