@@ -34,17 +34,20 @@ OS VOTOS SÃO CONTADOS COM ALGUNS MINUTOS DE ATRASO, ENTÃO TENHAM PACIÊNCIA!
 """
 while True:
     currentime = datetime.datetime.now().strftime("%H:%M")
-    assholecount = {
-        "NEOB": 0,
-        "EOB": 0,
-        "NGM": 0,
-        "TEOB": 0,
-        "INFO": 0
-    }
+    subcount = 0
     try:
         submissons = reddit.subreddit('EuSOuOBabaca').new(limit=100)
         time.sleep(1)
         for submission in submissons:
+            subcount += 1
+            print(f"== {subcount} ==")
+            assholecount = {
+                            "NEOB": 0,
+                            "EOB": 0,
+                            "NGM": 0,
+                            "TEOB": 0,
+                            "INFO": 0
+                            }
             sublist = open('idlist', 'r').readlines()
             indx = -1
             for i in sublist:
@@ -63,9 +66,17 @@ while True:
                 highest = 0
                 key = ''
                 for comment in comments:
-                    time.sleep(1)
                     if comment.author != 'EuSouOBabacaBOT':
                         comment_body = comment.body.split(' ')
+                        indx = -1
+                        for i in comment_body:
+                            indx += 1
+                            i = i.split("\n")
+                            comment_body[indx] = i[0]
+                            try:
+                                comment_body.insert(indx+1, i[1])
+                            except IndexError:
+                                pass
                         rate = []
                         for i in comment_body:
                             i = i.strip()
@@ -81,7 +92,7 @@ while True:
                         indx =-1
                         for w in rate:
                             indx += 1
-                            rate[indx] = w.upper()
+                            rate[indx] = w.upper().strip()
                         for r in rates:
                             if r in rate:
                                 assholecount[r] += 1
@@ -98,7 +109,6 @@ while True:
                             if v >= highest:
                                 highest = v
                                 key = k
-                        time.sleep(1)
                         if counted == 1:
                             for com in submission.comments.list():
                                 if com.author == "EuSouOBabacaBOT":
