@@ -40,7 +40,7 @@ def runtime():
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
         try:
-            submissons = reddit.subreddit('EuSOuOBabacaBOT').new(limit=100)
+            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=100)
             time.sleep(1)
             for submission in submissons:
                 subcount += 1
