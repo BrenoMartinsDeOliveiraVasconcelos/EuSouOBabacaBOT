@@ -106,9 +106,12 @@ def runtime():
                                     key = k
                             if counted == 1:
                                 for com in submission.comments.list():
-                                    if com.author == "EuSouOBabacaBOT":
-                                        com.edit(body=f"# VEREDITO ATUAL: {key} ({highest} votos)\n"+botxt)
-                                        tools.logger(1, sub_id=submission.id)
+                                    try:
+                                        if com.author == "EuSouOBabacaBOT":
+                                            com.edit(body=f"# VEREDITO ATUAL: {key} ({highest} votos)\n"+botxt)
+                                            tools.logger(1, sub_id=submission.id)
+                                    except Exception as e:
+                                        tools.logger(2, ex=e)
                         else:
                             pass
         except Exception as e:
