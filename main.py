@@ -69,51 +69,54 @@ def runtime():
                     highest = 0
                     key = ''
                     for comment in comments:
-                        if comment.author != 'EuSouOBabacaBOT':
-                            comment_body = comment.body.split(' ')
-                            indx = -1
-                            for i in comment_body:
-                                indx += 1
-                                i = i.split("\n")
-                                comment_body[indx] = i[0]
-                                try:
-                                    comment_body.insert(indx+1, i[1])
-                                except IndexError:
-                                    pass
-                            rate = []
-                            for i in comment_body:
-                                i = i.strip()
-                                replaces = ["!", "?", ".", ",", ":", "(", ")", "[", "]", "{", "}", "-",
-                                            "+", "/", "\\", "'", '"', '~']
-                                for c in replaces:
-                                    i = i.replace(c, "")
-                                rate.append(i)
-                            rates = ["NEOB", "EOB", "TEOB", "NGM", "INFO"]
-                            indx = -1
-                            for w in rate:
-                                indx += 1
-                                rate[indx] = w.upper().strip()
-                            for r in rates:
-                                if r in rate:
-                                    assholecount[r] += 1
-                                    counted = 1
-                                    break
-                            else:
-                                counted = 0
-                            for k, v in assholecount.items():
-                                if v >= highest:
-                                    highest = v
-                                    key = k
-                            if counted == 1:
-                                for com in submission.comments.list():
+                        try:
+                            if comment.author != 'EuSouOBabacaBOT':
+                                comment_body = comment.body.split(' ')
+                                indx = -1
+                                for i in comment_body:
+                                    indx += 1
+                                    i = i.split("\n")
+                                    comment_body[indx] = i[0]
                                     try:
-                                        if com.author == "EuSouOBabacaBOT":
-                                            com.edit(body=f"# VEREDITO ATUAL: {key} ({highest} votos)\n"+botxt)
-                                            tools.logger(1, sub_id=submission.id)
-                                    except Exception as e:
-                                        tools.logger(2, ex=e)
-                        else:
-                            pass
+                                        comment_body.insert(indx+1, i[1])
+                                    except IndexError:
+                                        pass
+                                rate = []
+                                for i in comment_body:
+                                    i = i.strip()
+                                    replaces = ["!", "?", ".", ",", ":", "(", ")", "[", "]", "{", "}", "-",
+                                                "+", "/", "\\", "'", '"', '~']
+                                    for c in replaces:
+                                        i = i.replace(c, "")
+                                    rate.append(i)
+                                rates = ["NEOB", "EOB", "TEOB", "NGM", "INFO"]
+                                indx = -1
+                                for w in rate:
+                                    indx += 1
+                                    rate[indx] = w.upper().strip()
+                                for r in rates:
+                                    if r in rate:
+                                        assholecount[r] += 1
+                                        counted = 1
+                                        break
+                                else:
+                                    counted = 0
+                                for k, v in assholecount.items():
+                                    if v >= highest:
+                                        highest = v
+                                        key = k
+                                if counted == 1:
+                                    for com in submission.comments.list():
+                                        try:
+                                            if com.author == "EuSouOBabacaBOT":
+                                                com.edit(body=f"# VEREDITO ATUAL: {key} ({highest} votos)\n"+botxt)
+                                                tools.logger(1, sub_id=submission.id)
+                                        except Exception as e:
+                                            tools.logger(2, ex=e)
+                            else:
+                                pass
+                        except Exception as e:
+                            tools.logger(2, ex=e)
         except Exception as e:
             tools.logger(2, ex=e)
 
