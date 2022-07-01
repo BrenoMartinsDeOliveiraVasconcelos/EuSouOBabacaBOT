@@ -110,7 +110,7 @@ def runtime():
                                 try:
                                     percent = highest/total
                                 except ZeroDivisionError:
-                                    percent = 100.00
+                                    percent = 1.00
                                 if counted == 1:
                                     for com in submission.comments.list():
                                         if com.author == "EuSouOBabacaBOT":
