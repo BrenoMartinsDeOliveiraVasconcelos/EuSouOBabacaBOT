@@ -101,14 +101,20 @@ def runtime():
                                         break
                                 else:
                                     counted = 0
+                                total = 0
                                 for k, v in assholecount.items():
+                                    total += v
                                     if v >= highest:
                                         highest = v
                                         key = k
+                                try:
+                                    percent = highest/total
+                                except ZeroDivisionError:
+                                    percent = 100.00
                                 if counted == 1:
                                     for com in submission.comments.list():
                                         if com.author == "EuSouOBabacaBOT":
-                                            com.edit(body=f"# VEREDITO ATUAL: {key} ({highest} votos)\n"+botxt)
+                                            com.edit(body=f"# VEREDITO ATUAL: {key} ({percent*100:.2f}% dos votos)\n"+botxt)
                                             tools.logger(1, sub_id=submission.id)
                             else:
                                 pass
