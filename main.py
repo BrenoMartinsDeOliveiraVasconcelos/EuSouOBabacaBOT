@@ -1,5 +1,4 @@
 import praw
-import time
 import datetime
 import json
 import tools
@@ -41,7 +40,6 @@ def runtime():
         subcount = 0
         try:
             submissons = reddit.subreddit('EuSOuOBabaca').new(limit=100)
-            time.sleep(1)
             for submission in submissons:
                 subcount += 1
                 print(f"== {subcount} ==")
@@ -114,7 +112,14 @@ def runtime():
                                 if counted == 1:
                                     for com in submission.comments.list():
                                         if com.author == "EuSouOBabacaBOT":
-                                            com.edit(body=f"# VEREDITO ATUAL: {key} ({percent*100:.2f}% de {total} "
+                                            judgment = "Não é o babaca" if key == "NEOB" else \
+                                                "É o babaca" if key == "EOB" else \
+                                                "Todo mundo é babaca" if key == "TEOB" else \
+                                                "Ninguém é o babaca" if key == "NGM" else \
+                                                "Falta informação"
+                                            com.edit(body=f"# VEREDITO ATUAL: {judgment} ({percent*100:.2f}% de {total}"
+                                                          f" "
+                                                          f""
                                                           f"votos)\n"+botxt)
                                             tools.logger(1, sub_id=submission.id)
                             else:

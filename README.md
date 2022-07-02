@@ -17,7 +17,7 @@ Primeiro, vamos instalar as dependências</br>
 * Insatle a linguagem de programação Python (confira como instalar para seu sistema operacion</br>
 * Abra o prompt de comando do seu sistema e digite "python3 -m pip install praw"</br>
 * Baixe os arquivos do BOT na pasta que desejar</br>
-* Na pasta, crie um arquivo chamado "login" (sem extensão)</br>
+* Na pasta, crie um arquivo chamado "login" (sem extensão) e outro chamado "log" (sem extensão)</br>
 ## 3.2 Criando uma aplicação no Reddit</br>
 Agora devemos criar uma aplicação na sua conta Reddit para poder executar o bot.</br>
 * Entre em https://www.reddit.com e logue sua conta</br>
