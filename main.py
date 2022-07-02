@@ -31,7 +31,7 @@ INFO - Falta informação
 OS VOTOS SÃO CONTADOS COM ALGUNS MINUTOS DE ATRASO, ENTÃO TENHAM PACIÊNCIA!
 
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
-^([Códiigdo fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))
+^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))
 """
 
 
@@ -114,7 +114,8 @@ def runtime():
                                 if counted == 1:
                                     for com in submission.comments.list():
                                         if com.author == "EuSouOBabacaBOT":
-                                            com.edit(body=f"# VEREDITO ATUAL: {key} ({percent*100:.2f}% dos votos)\n"+botxt)
+                                            com.edit(body=f"# VEREDITO ATUAL: {key} ({percent*100:.2f}% de {total} "
+                                                          f"votos)\n"+botxt)
                                             tools.logger(1, sub_id=submission.id)
                             else:
                                 pass
