@@ -42,7 +42,7 @@ def runtime():
             submissons = reddit.subreddit('EuSOuOBabaca').new(limit=100)
             for submission in submissons:
                 subcount += 1
-                print(f"== {subcount} ==")
+                tools.logger(tp=3, num=subcount)
                 assholecount = {
                                 "NEOB": 0,
                                 "EOB": 0,
