@@ -29,6 +29,8 @@ INFO - Falta informação
 
 OS VOTOS SÃO CONTADOS COM ALGUNS MINUTOS DE ATRASO, ENTÃO TENHAM PACIÊNCIA!
 
+Nota: Não dêem downvotes em opmiões que discordem, isso é chato!
+
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))
 """
