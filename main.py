@@ -29,7 +29,7 @@ INFO - Falta informação
 
 OS VOTOS SÃO CONTADOS COM ALGUNS MINUTOS DE ATRASO, ENTÃO TENHAM PACIÊNCIA!
 
-Nota: Não dêem downvotes em opmiões que discordem, isso é chato!
+Nota: O bot não conta respostas.
 
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))
@@ -64,13 +64,16 @@ def runtime():
                     sublist.append(submission.id)
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
+                submission.comments.replace_more(limit=100, threshold=100)
                 comments = submission.comments.list()
                 if currentime:
                     highest = 0
                     key = ''
+                    users = []
                     for comment in comments:
                         try:
-                            if comment.author != 'EuSouOBabacaBOT':
+                            if comment.author != 'EuSouOBabacaBOT' and comment.author not in users:
+                                users.append(comment.author)
                                 comment_body = comment.body.split(' ')
                                 indx = -1
                                 for i in comment_body:
