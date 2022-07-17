@@ -3,7 +3,6 @@ import datetime
 import json
 import tools
 
-
 login = json.load(open("login"))
 
 reddit = praw.Reddit(
@@ -15,7 +14,7 @@ reddit = praw.Reddit(
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
-botxt = """## VOTE SE O OP É UM BABACA COMENTANDO NO POST COM AS SEGUINTES SIGLAS EM ALGUMA PARTE DO TEXTO!:
+botxt = """## VOTE SE O OP É UM BABACA COMENTANDO NO POST COM AS SEGUINTES SIGLAS EM ALGUMA PARTE DO TEXTO! (O BOT NÃO CONTA RESPOSTAS):
 
 NEOB - Não é o babaca
 
