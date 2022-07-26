@@ -26,6 +26,8 @@ TEOB - Todo mundo é o babaca
 
 INFO - Falta informação 
 
+FANFIC - Quando é fanfic
+
 OS VOTOS SÃO CONTADOS COM ALGUNS MINUTOS DE ATRASO, ENTÃO TENHAM PACIÊNCIA!
 
 Nota: O bot não conta respostas.
@@ -120,7 +122,8 @@ def runtime():
                                                 "É o babaca" if key == "EOB" else \
                                                 "Todo mundo é babaca" if key == "TEOB" else \
                                                 "Ninguém é o babaca" if key == "NGM" else \
-                                                "Falta informação"
+                                                "Falta informação" if key == "INFO" else \
+                                                "Fanfic"
                                             com.edit(body=f"# VEREDITO ATUAL: {judgment} ({percent*100:.2f}% de {total}"
                                                           f" "
                                                           f""
