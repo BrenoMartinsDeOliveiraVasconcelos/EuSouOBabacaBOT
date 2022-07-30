@@ -37,7 +37,17 @@ while True:
                 subauthor = submission.author
                 if subauthor.comment_karma + subauthor.link_karma < 0:
                     submission.mod.remove(spam=True)
-                    bcomment = submission.reply("Publicação removida por karma negativo para evitar spam.")
+                    bcomment = submission.reply(body="Publicação removida por karma negativo para evitar spam.")
+                    tools.logger(tp=4, sub_id=submission.id, reason="Karma negativo")
+                subtxt = submission.selftext
+                subtxt = subtxt.split(" ")
+                for i in subtxt:
+                    i = i.strip().replace(" ", "").replace("\n", "")
+                    print(i)
+                    if i.startswith("[http") and r"//" in i:
+                        submission.mod.remove(spam=True)
+                        submission.reply(body="Não é permitido links nesse subreddit! Sua publicação foi removida.")
+                        tools.logger(tp=4, sub_id=submission.id, reason="Link")
                 open("modlist", "a").write(submission.id + "\n")
     except Exception as e:
         tools.logger(2, e)
