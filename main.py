@@ -67,6 +67,8 @@ def runtime():
                     redditor = submission.author
                     tools.logger(0, sub_id=submission.id)
                     botcomment.mod.distinguish(sticky=True)
+                    botcomment.mod.lock()
+                    botcomment.mod.approve()
                     sublist.append(submission.id)
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
@@ -134,6 +136,8 @@ def runtime():
                                                           f""
                                                           f"votos)\n"+botxt)
                                             tools.logger(1, sub_id=submission.id)
+                                            com.mod.lock()
+                                            com.mod.approve()
                             else:
                                 pass
                         except Exception as e:
