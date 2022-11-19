@@ -5,7 +5,7 @@ import tools
 import multiprocessing
 import os
 
-multiprocessing.Process(target=os.system, args=["python3 mod.py",]).start()
+# multiprocessing.Process(target=os.system, args=["python3 mod.py",]).start()
 
 login = json.load(open("login"))
 
@@ -63,6 +63,7 @@ def runtime():
                     indx += 1
                     sublist[indx] = i.strip()
                 if submission.id not in sublist:
+                    reddit.validate_on_submit = True
                     botcomment = submission.reply(body=botxt)
                     redditor = submission.author
                     tools.logger(0, sub_id=submission.id)
