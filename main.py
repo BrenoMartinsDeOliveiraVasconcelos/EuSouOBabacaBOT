@@ -47,7 +47,7 @@ def runtime():
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
         try:
-            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=100)
+            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=None)
             for submission in submissons:
                 subcount += 1
                 tools.logger(tp=3, num=subcount)
@@ -56,7 +56,8 @@ def runtime():
                                 "EOB": 0,
                                 "NGM": 0,
                                 "TEOB": 0,
-                                "INFO": 0
+                                "INFO": 0,
+                                "FANFIC": 0
                                 }
                 sublist = open('idlist', 'r').readlines()
                 indx = -1
@@ -74,7 +75,7 @@ def runtime():
                     sublist.append(submission.id)
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
-                submission.comments.replace_more(limit=100, threshold=100)
+                submission.comments.replace_more(limit=None)
                 comments = submission.comments.list()
                 if currentime:
                     highest = 0
@@ -133,6 +134,22 @@ def runtime():
                                                 "Ninguém é o babaca" if key == "NGM" else \
                                                 "Falta informação" if key == "INFO" else \
                                                 "Fanfic"
+
+                                            match key:
+                                                case 'NEOB':
+                                                    submission.flair.select("fad0940c-6841-11ed-baed-365116e43406")
+                                                case 'EOB':
+                                                    submission.flair.select("e46b8208-6841-11ed-99cd-cec761e4d61c")
+                                                case 'TEOB':
+                                                    submission.falir.select("8cb95bb0-6842-11ed-9cdf-a2c7df914eb2")
+                                                case 'NGM':
+                                                    submission.flair.select("3704e1da-6842-11ed-924e-e273ede5d967")
+                                                case 'INFO':
+                                                    submission.flair.select("562808bc-6842-11ed-8dd7-86bf8dba8041")
+                                                case 'FANFIC':
+                                                    submission.flair.select("eb374206-6842-11ed-96dc-d2448cda5278")
+                                                    submission.report("Suspeita de fanfic!")
+
                                             com.edit(body=f"# Veredito atual: {judgment} ({percent*100:.2f}% de {total}"
                                                           f" "
                                                           f""
