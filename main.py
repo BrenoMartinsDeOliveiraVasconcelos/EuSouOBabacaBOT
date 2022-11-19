@@ -65,6 +65,7 @@ def runtime():
                     indx += 1
                     sublist[indx] = i.strip()
                 if submission.id not in sublist:
+                    reddit.validate_on_submit = True
                     botcomment = submission.reply(body=botxt)
                     # redditor = submission.author
                     tools.logger(0, sub_id=submission.id)
