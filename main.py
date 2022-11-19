@@ -141,7 +141,7 @@ def runtime():
                                                 case 'EOB':
                                                     submission.flair.select("e46b8208-6841-11ed-99cd-cec761e4d61c")
                                                 case 'TEOB':
-                                                    submission.falir.select("8cb95bb0-6842-11ed-9cdf-a2c7df914eb2")
+                                                    submission.flair.select("8cb95bb0-6842-11ed-9cdf-a2c7df914eb2")
                                                 case 'NGM':
                                                     submission.flair.select("3704e1da-6842-11ed-924e-e273ede5d967")
                                                 case 'INFO':
