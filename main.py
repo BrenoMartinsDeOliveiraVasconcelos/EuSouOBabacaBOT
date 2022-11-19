@@ -2,10 +2,10 @@ import praw
 import datetime
 import json
 import tools
-import multiprocessing
-import os
+# import multiprocessing
+# import os
 
-multiprocessing.Process(target=os.system, args=["python3 mod.py",]).start()
+# multiprocessing.Process(target=os.system, args=["python3 mod.py",]).start()
 
 login = json.load(open("login"))
 
@@ -18,7 +18,8 @@ reddit = praw.Reddit(
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
-botxt = """## VOTE SE O OP É UM BABACA COMENTANDO NO POST COM AS SEGUINTES SIGLAS EM ALGUMA PARTE DO TEXTO! (O BOT NÃO CONTA RESPOSTAS):
+botxt = """## VOTE SE O OP É UM BABACA COMENTANDO NO POST COM AS SEGUINTES SIGLAS EM ALGUMA PARTE DO TEXTO! (O BOT 
+NÃO CONTA RESPOSTAS): 
 
 NEOB - Não é o babaca
 
@@ -42,6 +43,7 @@ Nota: O bot não conta respostas.
 
 
 def runtime():
+    reddit.validate_on_submit = True
     while True:
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
@@ -64,7 +66,7 @@ def runtime():
                     sublist[indx] = i.strip()
                 if submission.id not in sublist:
                     botcomment = submission.reply(body=botxt)
-                    redditor = submission.author
+                    # redditor = submission.author
                     tools.logger(0, sub_id=submission.id)
                     botcomment.mod.distinguish(sticky=True)
                     botcomment.mod.lock()
@@ -100,7 +102,7 @@ def runtime():
                                     for c in replaces:
                                         i = i.replace(c, "")
                                     rate.append(i)
-                                rates = ["NEOB", "EOB", "TEOB", "NGM", "INFO"]
+                                rates = ["NEOB", "EOB", "TEOB", "NGM", "INFO", "FANFIC"]
                                 indx = -1
                                 for w in rate:
                                     indx += 1
