@@ -133,7 +133,7 @@ def runtime():
                                                 "Ninguém é o babaca" if key == "NGM" else \
                                                 "Falta informação" if key == "INFO" else \
                                                 "Fanfic"
-                                            com.edit(body=f"# VEREDITO ATUAL: {judgment} ({percent*100:.2f}% de {total}"
+                                            com.edit(body=f"# Veredito atual: {judgment} ({percent*100:.2f}% de {total}"
                                                           f" "
                                                           f""
                                                           f"votos)\n"+botxt)
