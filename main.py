@@ -18,7 +18,7 @@ reddit = praw.Reddit(
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
-botxt = """## Olá... Eu sou o Lucas, o bot juiz desse sub. Eu vou contar as respostas que as pessoas dão nesse post... Para ser contado, responda com essas siglas no começo do post:
+botxt = """Olá... Eu sou o Lucas, o bot juiz desse sub. Eu vou contar as respostas que as pessoas dão nesse post... Para ser contado, responda com essas siglas no começo do comentário:
 
 NEOB - Não é o babaca
 
