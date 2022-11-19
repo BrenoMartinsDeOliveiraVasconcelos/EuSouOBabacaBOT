@@ -1,6 +1,5 @@
 import datetime
 import multiprocessing
-import praw
 
 
 def logit(msg):
@@ -9,6 +8,8 @@ def logit(msg):
 
 def logger(tp, sub_id="", ex="", num="", reason=""):
     current_time = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+    msg = ""
+
     if tp == 0:
         msg = f"[{current_time}] Comentário enviado em {sub_id}"
     elif tp == 1:

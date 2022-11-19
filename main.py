@@ -18,7 +18,7 @@ reddit = praw.Reddit(
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
-botxt = """## VOTE SE O OP É UM BABACA COMENTANDO NO POST COM AS SEGUINTES SIGLAS EM ALGUMA PARTE DO TEXTO! (O BOT NÃO CONTA RESPOSTAS): 
+botxt = """## Olá... Eu sou o Lucas, o bot juiz desse sub. Eu vou contar as respostas que as pessoas dão nesse post... Para ser contado, responda com essas siglas no começo do post:
 
 NEOB - Não é o babaca
 
@@ -32,9 +32,9 @@ INFO - Falta informação
 
 FANFIC - Quando é fanfic
 
-OS VOTOS SÃO CONTADOS COM ALGUNS MINUTOS DE ATRASO, ENTÃO TENHAM PACIÊNCIA!
+Demora um pouco até eu contar tudo, então espere alguns minutos... Ou sei lá, tanto faz.
 
-Nota: O bot não conta respostas.
+Nota: Eu não conto respostas a comentários, somente comentários.
 
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))
