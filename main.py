@@ -44,6 +44,7 @@ Nota: Eu não conto respostas a comentários, somente comentários.
 def runtime():
     reddit.validate_on_submit = True
     while True:
+        was_in_sub = True
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
         try:
@@ -73,6 +74,7 @@ def runtime():
                     botcomment.mod.lock()
                     botcomment.mod.approve()
                     sublist.append(submission.id)
+                    was_in_sub = False
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
                 submission.comments.replace_more(limit=None)
@@ -81,6 +83,7 @@ def runtime():
                     highest = 0
                     key = ''
                     users = []
+                    fanficout = 0
                     for comment in comments:
                         try:
                             if comment.author != 'EuSouOBabacaBOT' and comment.author not in users:
@@ -147,8 +150,13 @@ def runtime():
                                                 case 'INFO':
                                                     submission.flair.select("562808bc-6842-11ed-8dd7-86bf8dba8041")
                                                 case 'FANFIC':
-                                                    submission.flair.select("eb374206-6842-11ed-96dc-d2448cda5278")
-                                                    submission.report("Suspeita de fanfic!")
+                                                    fanficout += 1
+                                                    if not was_in_sub:
+                                                        if fanficout >= 4:
+                                                            submission.flair.select("eb374206-6842-11ed-96dc-d2448cda5278")
+                                                            submission.report("Suspeita de fanfic!")
+                                                        elif fanficout >= 8:
+                                                            submission.mod.remove(spam=False)
 
                                             com.edit(body=f"# Veredito atual: {judgment} ({percent*100:.2f}% de {total}"
                                                           f" "
