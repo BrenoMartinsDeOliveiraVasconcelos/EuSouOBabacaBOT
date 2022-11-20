@@ -48,7 +48,7 @@ def runtime():
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
         try:
-            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=None)
+            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=500)
             for submission in submissons:
                 subcount += 1
                 tools.logger(tp=3, num=subcount)
