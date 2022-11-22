@@ -235,8 +235,9 @@ if __name__ == '__main__':
                 await ctx.send("Se é isso que você quer, tanto faz pra mim.")
                 exit(0)
 
-    @bot.command(name="configurar", help="Troca a configuração no arquivo json 'config'. 'mostrar' para"
-                                            " mostrar as configurações atuais. <key> <value> para alterar.")
+
+    @bot.command(name="configurar", help="Troca a configuração no arquivo json 'config'. 'mostrar' para "
+                                            "mostrar as configurações atuais. <key> <value> para alterar.")
     async def config(ctx, *args):
         if len(args) >= 2:
             login[args[0]] = args[1]
