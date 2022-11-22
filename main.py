@@ -2,12 +2,15 @@ import praw
 import datetime
 import json
 import tools
-# import multiprocessing
+import multiprocessing
+import discord
+from discord.ext import commands
+import datetime
 # import os
 
 # multiprocessing.Process(target=os.system, args=["python3 mod.py",]).start()
 
-login = json.load(open("login"))
+login = json.load(open("config"))
 
 reddit = praw.Reddit(
     user_agent='<Linux>:<reddit-bot>:<v1.0> (by /u/JakeWisconsin)',
@@ -50,6 +53,11 @@ def runtime():
         try:
             submissons = reddit.subreddit('EuSOuOBabaca').new(limit=500)
             for submission in submissons:
+                rst = open("restart", "r").readlines()
+                if rst[0] == "1":
+                    open("restart", "w+").write("0")
+                    tools.logger(tp=2, ex="Bot reiniciado remotamente.")
+                    break
                 subcount += 1
                 tools.logger(tp=3, num=subcount)
                 assholecount = {
@@ -153,7 +161,8 @@ def runtime():
                                                     fanficout += 1
                                                     if not was_in_sub:
                                                         if fanficout >= 4:
-                                                            submission.flair.select("eb374206-6842-11ed-96dc-d2448cda5278")
+                                                            submission.flair.select("eb374206-6842-11ed-96dc"
+                                                                                    "-d2448cda5278")
                                                             submission.report("Suspeita de fanfic!")
                                                         elif fanficout >= 8:
                                                             submission.mod.remove(spam=False)
@@ -161,10 +170,14 @@ def runtime():
                                             com.edit(body=f"# Veredito atual: {judgment} ({percent*100:.2f}% de {total}"
                                                           f" "
                                                           f""
-                                                          f"votos)\n"+botxt)
+                                                          f"votos)\nÚltima atualização feita em: "
+                                                          f"{datetime.datetime.now().day}/"
+                                                          f"{datetime.datetime.now().month}"
+                                                          f"/{datetime.datetime.now().year} "
+                                                          f"{datetime.datetime.now().hour}"
+                                                          f":{datetime.datetime.now().minute}"
+                                                          f"\n\n"+botxt)
                                             tools.logger(1, sub_id=submission.id)
-                                            com.mod.lock()
-                                            com.mod.approve()
                             else:
                                 pass
                         except Exception as e:
@@ -174,4 +187,44 @@ def runtime():
 
 
 if __name__ == '__main__':
-    runtime()
+    bot_thread = multiprocessing.Process(target=runtime, args=(), )
+    bot_thread.start()
+
+    intents = discord.Intents().all()
+    bot = commands.Bot(command_prefix="/", intents=intents)
+    discord_token = login["discord_token"]
+
+
+    @bot.command(name="ping")
+    async def ping(ctx):
+        await ctx.send("Pong!")
+
+
+    @bot.command(name="reiniciar")
+    async def reset(ctx):
+        await ctx.send("Ok.")
+        open("restart", "w+").write("1")
+        await ctx.send("Pronto.")
+
+
+    @bot.command(name="log")
+    async def send_log(ctx):
+        await ctx.send("Aqui está!")
+        await ctx.send(":D", file=discord.File(r"log"))
+
+
+    @bot.command(name="fechar")
+    async def close(ctx, *args):
+        tools.logger(tp=2, ex="Bot ou programa fechado remotamente.")
+        if len(args) > 0:
+            if args[0] == "bot":
+                await ctx.send("Blz")
+                try:
+                    bot_thread.terminate()
+                except (AssertionError, AttributeError):
+                    pass
+            elif args[0] == "programa":
+                await ctx.send("Se é isso que você quer, tanto faz pra mim.")
+                exit(0)
+
+    bot.run(discord_token)

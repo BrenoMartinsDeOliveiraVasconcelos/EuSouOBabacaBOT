@@ -5,6 +5,8 @@ import multiprocessing
 def logit(msg):
     open("log", "a").write(msg + "\n")
 
+    if datetime.datetime.now().hour == 0:
+        open("log", "w+").write(msg + "\n")
 
 def logger(tp, sub_id="", ex="", num="", reason=""):
     current_time = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
