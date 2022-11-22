@@ -202,21 +202,25 @@ if __name__ == '__main__':
 
     @bot.command(name="reiniciar")
     async def reset(ctx):
-        await ctx.send("Ok.")
+        await ctx.send("Ok")
         open("restart", "w+").write("1")
         await ctx.send("Pronto.")
 
 
     @bot.command(name="log")
-    async def send_log(ctx):
-        await ctx.send("Aqui está!")
-        await ctx.send(":D", file=discord.File(r"log"))
+    async def send_log(ctx, *args):
+        if len(args) == 0:
+            await ctx.send("Aqui está!")
+            await ctx.send(".", file=discord.File(r"log"))
+        elif args[0] == "limpar":
+            await ctx.send("Ok")
+            open("log", "w+").write("")
 
 
     @bot.command(name="fechar")
     async def close(ctx, *args):
-        tools.logger(tp=2, ex="Bot ou programa fechado remotamente.")
         if len(args) > 0:
+            tools.logger(tp=2, ex="Bot ou programa fechado remotamente.")
             if args[0] == "bot":
                 await ctx.send("Blz")
                 try:
