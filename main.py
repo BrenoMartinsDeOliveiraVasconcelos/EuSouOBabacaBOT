@@ -51,7 +51,7 @@ def runtime():
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
         try:
-            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=500)
+            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=login["submissions"])
             for submission in submissons:
                 rst = open("restart", "r").readlines()
                 if rst[0] == "1":
@@ -195,19 +195,20 @@ if __name__ == '__main__':
     discord_token = login["discord_token"]
 
 
-    @bot.command(name="ping")
+    @bot.command(name="ping", help="Ping!")
     async def ping(ctx):
         await ctx.send("Pong!")
 
 
-    @bot.command(name="reiniciar")
+    @bot.command(name="reiniciar", help="Reinicia a sessão no reddit")
     async def reset(ctx):
         await ctx.send("Ok")
         open("restart", "w+").write("1")
         await ctx.send("Pronto.")
 
 
-    @bot.command(name="log")
+    @bot.command(name="log", help="Retorna o arquivo de log caso não tenha um argumento"
+                                    "\nCaso tenha o argumento 'limpar', limpa o arquivo de log")
     async def send_log(ctx, *args):
         if len(args) == 0:
             await ctx.send("Aqui está!")
@@ -217,7 +218,10 @@ if __name__ == '__main__':
             open("log", "w+").write("")
 
 
-    @bot.command(name="fechar")
+    @bot.command(name="fechar", help="Fecha o programa ou o bot.\n"
+                                        "\n'bot' fecha apenas a sessão do bot"
+                                        "\np'programa' fecha o programa inteiro. Pode ser"
+                                        "necessário entrar no servidor para iniciar de novo.")
     async def close(ctx, *args):
         if len(args) > 0:
             tools.logger(tp=2, ex="Bot ou programa fechado remotamente.")
@@ -230,5 +234,17 @@ if __name__ == '__main__':
             elif args[0] == "programa":
                 await ctx.send("Se é isso que você quer, tanto faz pra mim.")
                 exit(0)
+
+    @bot.command(name="configurar", help="Troca a configuração no arquivo json 'config'. 'mostrar' para"
+                                            " mostrar as configurações atuais. <key> <value> para alterar.")
+    async def config(ctx, *args):
+        if len(args) >= 2:
+            login[args[0]] = args[1]
+        elif len(args) == 1:
+            if args[0] == "mostrar":
+                await ctx.send(f"{login}")
+
+        open("config", "w+").write(json.dumps(login, indent=4))
+
 
     bot.run(discord_token)
