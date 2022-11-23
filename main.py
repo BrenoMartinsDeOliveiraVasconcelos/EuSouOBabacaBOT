@@ -171,11 +171,7 @@ def runtime():
                                                           f" "
                                                           f""
                                                           f"votos)\nÚltima atualização feita em: "
-                                                          f"{datetime.datetime.now().day}/"
-                                                          f"{datetime.datetime.now().month}"
-                                                          f"/{datetime.datetime.now().year} "
-                                                          f"{datetime.datetime.now().hour}"
-                                                          f":{datetime.datetime.now().minute}"
+                                                          f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}"
                                                           f"\n\n"+botxt)
                                             tools.logger(1, sub_id=submission.id)
                             else:
