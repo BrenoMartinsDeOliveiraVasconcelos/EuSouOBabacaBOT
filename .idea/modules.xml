@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/EuSouOBabacaBOT.iml" filepath="$PROJECT_DIR$/.idea/EuSouOBabacaBOT.iml" />
       <module fileurl="file://C:/FC_Backend/.idea/FC_Backend.iml" filepath="C:/FC_Backend/.idea/FC_Backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../FC_Installer/.idea/FC_Installer.iml" filepath="$PROJECT_DIR$/../../FC_Installer/.idea/FC_Installer.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../Testes/threading/.idea/threading.iml" filepath="$PROJECT_DIR$/../../Testes/threading/.idea/threading.iml" />
     </modules>
   </component>

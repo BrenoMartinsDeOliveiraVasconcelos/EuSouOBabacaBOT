@@ -8,5 +8,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="threading" />
     <orderEntry type="module" module-name="FC_Backend" />
+    <orderEntry type="module" module-name="FC_Installer" />
   </component>
 </module>
