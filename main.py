@@ -1,30 +1,26 @@
 import praw
-import datetime
 import json
 import tools
 import multiprocessing
 import discord
 from discord.ext import commands
-import datetime
 import os
 import psutil
+import datetime
 
-# import os
-
-# multiprocessing.Process(target=os.system, args=["python3 mod.py",]).start()
-
-login = json.load(open("config"))
+settings = json.load(open("config"))
 
 reddit = praw.Reddit(
     user_agent='<Linux>:<reddit-bot>:<v1.0> (by /u/JakeWisconsin)',
-    client_id=login["clientid"],
-    client_secret=login["clientsecret"],
-    username=login["username"],
-    password=login["password"]
+    client_id=settings["clientid"],
+    client_secret=settings["clientsecret"],
+    username=settings["username"],
+    password=settings["password"]
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
-botxt = """Olá... Eu sou o Lucas, o bot juiz desse sub. Eu vou contar as respostas que as pessoas dão nesse post... Para ser contado, responda com essas siglas no começo do comentário:
+botxt = \
+    """Vou contar as respostas que as pessoas dão nesse post! Pra ser contado, responda com essas siglas o post:
 
 NEOB - Não é o babaca
 
@@ -53,7 +49,7 @@ def runtime():
         was_in_sub = True
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
-        submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(login["submissions"]))
+        submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(settings["submissions"]))
         for submission in submissons:
             rst = open("restart", "r").readlines()
             if rst[0] == "1":
@@ -77,7 +73,6 @@ def runtime():
                 indx += 1
                 sublist[indx] = i.strip()
             if submission.id not in sublist:
-                reddit.validate_on_submit = True
                 botcomment = submission.reply(body=botxt)
                 # redditor = submission.author
                 tools.logger(0, sub_id=submission.id)
@@ -143,11 +138,11 @@ def runtime():
                                 percent = 1.00
                             if counted == 1:
                                 judgment = "Não é o babaca" if key == "NEOB" else \
-                                    "É o babaca" if key == "EOB" else \
-                                    "Todo mundo é babaca" if key == "TEOB" else \
-                                    "Ninguém é o babaca" if key == "NGM" else \
-                                    "Falta informação" if key == "INFO" else \
-                                    "Fake"
+                                            "É o babaca" if key == "EOB" else \
+                                            "Todo mundo é babaca" if key == "TEOB" else \
+                                            "Ninguém é o babaca" if key == "NGM" else \
+                                            "Falta informação" if key == "INFO" else \
+                                            "Fake"
 
                                 if percent < 0.50:
                                     judgment = "Inconclusivo"
@@ -155,7 +150,7 @@ def runtime():
                                 else:
                                     votetxt = f"{percent * 100:.2f}% de {total} votos"
                                 ftxt = f"# Veredito atual:" \
-                                    f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
+                                       f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
                                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
 
                         else:
@@ -198,26 +193,32 @@ if __name__ == '__main__':
 
     intents = discord.Intents().all()
     bot = commands.Bot(command_prefix="/", intents=intents)
-    discord_token = login["discord_token"]
+    discord_token = settings["discord_token"]
 
 
     @bot.command(name="ping", help="Pong!")
     async def ping(ctx):
         await ctx.send("Pong!")
+        dpid = os.getpid()
+        rpid = bot_thread.pid
         pingdict = {
-            "is_alive": bot_thread.is_alive(),
-            "current_post": open("last", "r").readline().strip("\n"),
+            "is_alive": bot_thread.is_alive(), "current_post": open("last", "r").readline().strip("\n"),
             "log_size": f'{os.stat("log").st_size / 1024:.0f} kb',
-            "reddit_thread_pid": bot_thread.pid,
-            "discord_pid": os.getpid(),
-            "memory_d": f"{psutil.Process(os.getpid()).memory_info().rss / 1024**2:.0f} mb",
+            "reddit_thread_pid": rpid,
+            "discord_pid": dpid,
+            "memory_d": f"{psutil.Process(dpid).memory_info().rss / 1024 ** 2:.0f} mb",
+            "memory_rd": f"{psutil.Process(rpid).memory_info().rss / 1024 ** 2:.0f} mb",
+            "memory_total": f""
+            f"{(psutil.Process(dpid).memory_info().rss / 1024 ** 2) + (psutil.Process(rpid).memory_info().rss / 1024 ** 2):.0f} mb",
+            "cpu_d": f"{psutil.Process(dpid).cpu_percent() * 100:.3f}%",
+            "cpu_rd": f"{psutil.Process(rpid).cpu_percent() * 100:.3f}%",
+            "cpu_total": f"{psutil.Process(dpid).cpu_percent() * 100 + psutil.Process(rpid).cpu_percent() * 100:.3f}"
         }
-
-        pingdict["memory_rd"] = f"{psutil.Process(pingdict['reddit_thread_pid']).memory_info().rss / 1024**2:.0f} mb"
-        pingdict["memory_total"] = f"{(psutil.Process(os.getpid()).memory_info().rss / 1024**2) + (psutil.Process(pingdict['reddit_thread_pid']).memory_info().rss / 1024**2):.0f} mb "
 
         for k, v in pingdict.items():
             await ctx.send(f"{k} = {v}")
+
+        await ctx.send("Log", file=discord.File(r"log"))
 
 
     @bot.command(name="reiniciar", help="Reinicia a sessão no reddit")
@@ -260,12 +261,12 @@ if __name__ == '__main__':
                                          "mostrar as configurações atuais. <key> <value> para alterar.")
     async def config(ctx, *args):
         if len(args) >= 2:
-            login[args[0]] = args[1]
+            settings[args[0]] = args[1]
         elif len(args) == 1:
             if args[0] == "mostrar":
-                await ctx.send(f"{login}")
+                await ctx.send(f"{settings}")
 
-        open("config", "w+").write(json.dumps(login, indent=4))
+        open("config", "w+").write(json.dumps(settings, indent=4))
 
 
     bot.run(discord_token)
