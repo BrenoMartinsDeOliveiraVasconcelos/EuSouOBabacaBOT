@@ -53,7 +53,7 @@ def runtime():
         was_in_sub = True
         currentime = datetime.datetime.now().strftime("%H:%M")
         subcount = 0
-        submissons = reddit.subreddit('EuSOuOBabaca').new(limit=login["submissions"])
+        submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(login["submissions"]))
         for submission in submissons:
             rst = open("restart", "r").readlines()
             if rst[0] == "1":
@@ -95,6 +95,8 @@ def runtime():
                 key = ''
                 users = []
                 fanficout = 0
+                ftxt = ""
+                judgment = ""
                 for comment in comments:
                     try:
                         if comment.author != 'EuSouOBabacaBOT' and comment.author not in users:
@@ -140,52 +142,54 @@ def runtime():
                             except ZeroDivisionError:
                                 percent = 1.00
                             if counted == 1:
-                                for com in submission.comments.list():
-                                    if com.author == "EuSouOBabacaBOT":
-                                        judgment = "Não é o babaca" if key == "NEOB" else \
-                                            "É o babaca" if key == "EOB" else \
-                                            "Todo mundo é babaca" if key == "TEOB" else \
-                                            "Ninguém é o babaca" if key == "NGM" else \
-                                            "Falta informação" if key == "INFO" else \
-                                            "Fake"
+                                judgment = "Não é o babaca" if key == "NEOB" else \
+                                    "É o babaca" if key == "EOB" else \
+                                    "Todo mundo é babaca" if key == "TEOB" else \
+                                    "Ninguém é o babaca" if key == "NGM" else \
+                                    "Falta informação" if key == "INFO" else \
+                                    "Fake"
 
-                                        match key:
-                                            case 'NEOB':
-                                                submission.flair.select("fad0940c-6841-11ed-baed-365116e43406")
-                                            case 'EOB':
-                                                submission.flair.select("e46b8208-6841-11ed-99cd-cec761e4d61c")
-                                            case 'TEOB':
-                                                submission.flair.select("8cb95bb0-6842-11ed-9cdf-a2c7df914eb2")
-                                            case 'NGM':
-                                                submission.flair.select("3704e1da-6842-11ed-924e-e273ede5d967")
-                                            case 'INFO':
-                                                submission.flair.select("562808bc-6842-11ed-8dd7-86bf8dba8041")
-                                            case 'FANFIC':
-                                                fanficout += 1
-                                                if not was_in_sub:
-                                                    if fanficout >= 4:
-                                                        submission.flair.select("eb374206-6842-11ed-96dc"
-                                                                                "-d2448cda5278")
-                                                        submission.report("Suspeita de fanfic!")
-                                                    elif fanficout >= 8:
-                                                        submission.mod.remove(spam=False)
+                                if percent < 0.50:
+                                    judgment = "Inconclusivo"
+                                    votetxt = f"{total} votos contados ao total"
+                                else:
+                                    votetxt = f"{percent * 100:.2f}% de {total} votos"
+                                ftxt = f"# Veredito atual:" \
+                                    f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
+                                       f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
 
-                                        if percent < 0.50:
-                                            judgment = "Inconclusivo"
-                                            votetxt = f"{total} votos contados ao total"
-                                            submission.flair.select("17ace5be-6cd2-11ed-880b-f6403a5de3db")
-                                        else:
-                                            votetxt = f"{percent * 100:.2f}% de {total} votos"
-                                        ftxt = f"# Veredito atual:" \
-                                            f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
-                                               f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
-                                        com.edit(
-                                            body=ftxt + botxt)
-                                        tools.logger(1, sub_id=submission.id)
                         else:
                             pass
                     except Exception as e:
                         tools.logger(2, ex=e)
+                for com in comments:
+                    if com.author == "EuSouOBabacaBot":
+                        com.edit(
+                            body=ftxt + botxt)
+                        tools.logger(1, sub_id=submission.id)
+
+                match judgment:
+                    case 'Não é o babaca':
+                        submission.flair.select("fad0940c-6841-11ed-baed-365116e43406")
+                    case 'É o babaca':
+                        submission.flair.select("e46b8208-6841-11ed-99cd-cec761e4d61c")
+                    case 'Todo mundo é babaca':
+                        submission.flair.select("8cb95bb0-6842-11ed-9cdf-a2c7df914eb2")
+                    case 'Ninguém é o babaca':
+                        submission.flair.select("3704e1da-6842-11ed-924e-e273ede5d967")
+                    case 'Falta informação':
+                        submission.flair.select("562808bc-6842-11ed-8dd7-86bf8dba8041")
+                    case "Inconclusivo":
+                        submission.flair.select("17ace5be-6cd2-11ed-880b-f6403a5de3db")
+                    case 'Fake':
+                        fanficout += 1
+                        if not was_in_sub:
+                            if fanficout >= 4:
+                                submission.flair.select("eb374206-6842-11ed-96dc"
+                                                        "-d2448cda5278")
+                                submission.report("Suspeita de fanfic!")
+                            elif fanficout >= 8:
+                                submission.mod.remove(spam=False)
 
 
 if __name__ == '__main__':
