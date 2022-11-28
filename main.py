@@ -1,5 +1,8 @@
 import praw
 import json
+
+import prawcore.exceptions
+
 import tools
 import multiprocessing
 import discord
@@ -11,7 +14,7 @@ import datetime
 settings = json.load(open("config"))
 
 reddit = praw.Reddit(
-    user_agent='<Linux>:<reddit-bot>:<v1.0> (by /u/JakeWisconsin)',
+    user_agent='<Linux>:<reddit-bot>:<v2.0> (by /u/JakeWisconsin)',
     client_id=settings["clientid"],
     client_secret=settings["clientsecret"],
     username=settings["username"],
@@ -46,46 +49,44 @@ Nota: Eu não conto respostas a comentários, somente comentários.
 def runtime():
     reddit.validate_on_submit = True
     while True:
-        was_in_sub = True
-        currentime = datetime.datetime.now().strftime("%H:%M")
-        subcount = 0
-        submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(settings["submissions"]))
-        for submission in submissons:
-            rst = open("restart", "r").readlines()
-            if rst[0] == "1":
-                open("restart", "w+").write("0")
-                tools.logger(tp=2, ex="Bot reiniciado remotamente.")
-                break
-            subcount += 1
-            open("last", "w+").write(f"{subcount}")
-            tools.logger(tp=3, num=subcount)
-            assholecount = {
-                "NEOB": 0,
-                "EOB": 0,
-                "NGM": 0,
-                "TEOB": 0,
-                "INFO": 0,
-                "FANFIC": 0
-            }
-            sublist = open('idlist', 'r').readlines()
-            indx = -1
-            for i in sublist:
-                indx += 1
-                sublist[indx] = i.strip()
-            if submission.id not in sublist:
-                botcomment = submission.reply(body=botxt)
-                # redditor = submission.author
-                tools.logger(0, sub_id=submission.id)
-                botcomment.mod.distinguish(sticky=True)
-                botcomment.mod.lock()
-                botcomment.mod.approve()
-                sublist.append(submission.id)
-                was_in_sub = False
-                with open('idlist', 'a') as f:
-                    f.write(submission.id + '\n')
-            submission.comments.replace_more(limit=None)
-            comments = submission.comments.list()
-            if currentime:
+        try:
+            was_in_sub = True
+            subcount = 0
+            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(settings["submissions"]))
+            for submission in submissons:
+                rst = open("restart", "r").readlines()
+                if rst[0] == "1":
+                    open("restart", "w+").write("0")
+                    tools.logger(tp=2, ex="Bot reiniciado remotamente.")
+                    break
+                subcount += 1
+                open("last", "w+").write(f"{subcount}")
+                tools.logger(tp=3, num=subcount)
+                assholecount = {
+                    "NEOB": 0,
+                    "EOB": 0,
+                    "NGM": 0,
+                    "TEOB": 0,
+                    "INFO": 0,
+                    "FANFIC": 0
+                }
+                sublist = open('idlist', 'r').readlines()
+                indx = -1
+                for i in sublist:
+                    indx += 1
+                    sublist[indx] = i.strip()
+                if submission.id not in sublist:
+                    botcomment = submission.reply(body=botxt)
+                    tools.logger(0, sub_id=submission.id)
+                    botcomment.mod.distinguish(sticky=True)
+                    botcomment.mod.lock()
+                    botcomment.mod.approve()
+                    sublist.append(submission.id)
+                    was_in_sub = False
+                    with open('idlist', 'a') as f:
+                        f.write(submission.id + '\n')
+                submission.comments.replace_more(limit=None)
+                comments = submission.comments.list()
                 highest = 0
                 key = ''
                 users = []
@@ -157,6 +158,7 @@ def runtime():
                             pass
                     except Exception as e:
                         tools.logger(2, ex=e)
+
                 for com in comments:
                     if com.author == "EuSouOBabacaBot":
                         com.edit(
@@ -185,6 +187,8 @@ def runtime():
                                 submission.report("Suspeita de fanfic!")
                             elif fanficout >= 8:
                                 submission.mod.remove(spam=False)
+        except prawcore.exceptions.ServerError:
+            pass
 
 
 if __name__ == '__main__':
@@ -212,7 +216,7 @@ if __name__ == '__main__':
             f"{(psutil.Process(dpid).memory_info().rss / 1024 ** 2) + (psutil.Process(rpid).memory_info().rss / 1024 ** 2):.0f} mb",
             "cpu_d": f"{psutil.Process(dpid).cpu_percent() * 100:.3f}%",
             "cpu_rd": f"{psutil.Process(rpid).cpu_percent() * 100:.3f}%",
-            "cpu_total": f"{psutil.Process(dpid).cpu_percent() * 100 + psutil.Process(rpid).cpu_percent() * 100:.3f}"
+            "cpu_total": f"{psutil.Process(dpid).cpu_percent() * 100 + psutil.Process(rpid).cpu_percent() * 100:.3f}%",
         }
 
         for k, v in pingdict.items():
