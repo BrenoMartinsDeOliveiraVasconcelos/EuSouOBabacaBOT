@@ -1,8 +1,6 @@
 import praw
 import json
-
-import prawcore.exceptions
-
+from prawcore import exceptions
 import tools
 import multiprocessing
 import discord
@@ -10,6 +8,7 @@ from discord.ext import commands
 import os
 import psutil
 import datetime
+import time
 
 settings = json.load(open("config"))
 
@@ -40,9 +39,6 @@ FANFIC - Quando é fanfic
 Demora um pouco até eu contar tudo, então espere alguns minutos... Ou sei lá, tanto faz.
 
 Nota: Eu não conto respostas a comentários, somente comentários.
-
-^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
-^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))
 """
 
 
@@ -50,10 +46,17 @@ def runtime():
     reddit.validate_on_submit = True
     while True:
         try:
-            was_in_sub = True
+            ftxt = f"# Veredito atual:" \
+                   f" Não disponível \n\nÚltima atualização feita em: " \
+                   f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
+            etxt = """
+            ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
+            ^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))"""
             subcount = 0
             submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(settings["submissions"]))
+
             for submission in submissons:
+                submission.comment_sort = 'new'
                 rst = open("restart", "r").readlines()
                 if rst[0] == "1":
                     open("restart", "w+").write("0")
@@ -76,13 +79,12 @@ def runtime():
                     indx += 1
                     sublist[indx] = i.strip()
                 if submission.id not in sublist:
-                    botcomment = submission.reply(body=botxt)
+                    botcomment = submission.reply(body=ftxt+botxt+etxt)
                     tools.logger(0, sub_id=submission.id)
                     botcomment.mod.distinguish(sticky=True)
                     botcomment.mod.lock()
                     botcomment.mod.approve()
                     sublist.append(submission.id)
-                    was_in_sub = False
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
                 submission.comments.replace_more(limit=None)
@@ -90,9 +92,9 @@ def runtime():
                 highest = 0
                 key = ''
                 users = []
-                fanficout = 0
-                ftxt = ""
                 judgment = ""
+                total = 0
+
                 for comment in comments:
                     try:
                         if comment.author != 'EuSouOBabacaBOT' and comment.author not in users:
@@ -151,19 +153,40 @@ def runtime():
                                 else:
                                     votetxt = f"{percent * 100:.2f}% de {total} votos"
                                 ftxt = f"# Veredito atual:" \
-                                       f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
-                                       f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
+                                        f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
+                                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
 
-                        else:
-                            pass
                     except Exception as e:
                         tools.logger(2, ex=e)
+
+                percents = {}
+                for k, v in assholecount.items():
+                    try:
+                        percents[k] = f"{(int(v)/total)*100:.2f}"
+                    except ZeroDivisionError:
+                        percents[k] = f"0.00"
+
+                etxt = f"""
+# Tabela de votos
+Voto | Quantidade | Porcentagem
+:--:|:--:|:--:
+"""
+                for k, v in assholecount.items():
+                    etxt += f"{k} | {v} | {percents[k]}%\n"
+
+                etxt += """
+^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
+^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))"""
 
                 for com in comments:
                     if com.author == "EuSouOBabacaBot":
                         com.edit(
-                            body=ftxt + botxt)
+                            body=ftxt + botxt + etxt)
                         tools.logger(1, sub_id=submission.id)
+
+                ftxt = f"# Veredito atual:" \
+                        f" Não disponível \n\nÚltima atualização feita em: " \
+                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
 
                 match judgment:
                     case 'Não é o babaca':
@@ -178,16 +201,7 @@ def runtime():
                         submission.flair.select("562808bc-6842-11ed-8dd7-86bf8dba8041")
                     case "Inconclusivo":
                         submission.flair.select("17ace5be-6cd2-11ed-880b-f6403a5de3db")
-                    case 'Fake':
-                        fanficout += 1
-                        if not was_in_sub:
-                            if fanficout >= 4:
-                                submission.flair.select("eb374206-6842-11ed-96dc"
-                                                        "-d2448cda5278")
-                                submission.report("Suspeita de fanfic!")
-                            elif fanficout >= 8:
-                                submission.mod.remove(spam=False)
-        except prawcore.exceptions.ServerError:
+        except exceptions.ServerError:
             pass
 
 
@@ -213,7 +227,8 @@ if __name__ == '__main__':
             "memory_d": f"{psutil.Process(dpid).memory_info().rss / 1024 ** 2:.0f} mb",
             "memory_rd": f"{psutil.Process(rpid).memory_info().rss / 1024 ** 2:.0f} mb",
             "memory_total": f""
-            f"{(psutil.Process(dpid).memory_info().rss / 1024 ** 2) + (psutil.Process(rpid).memory_info().rss / 1024 ** 2):.0f} mb",
+            f"{(psutil.Process(dpid).memory_info().rss/1024**2)+(psutil.Process(rpid).memory_info().rss/1024**2):.0f} "
+                            f"mb",
             "cpu_d": f"{psutil.Process(dpid).cpu_percent() * 100:.3f}%",
             "cpu_rd": f"{psutil.Process(rpid).cpu_percent() * 100:.3f}%",
             "cpu_total": f"{psutil.Process(dpid).cpu_percent() * 100 + psutil.Process(rpid).cpu_percent() * 100:.3f}%",
