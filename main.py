@@ -50,7 +50,7 @@ def runtime():
                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
             etxt = """
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
-^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))"""
+^(Lucas Bot v2.0 - by [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin))"""
             subcount = 0
             submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(settings["submissions"]))
 
@@ -145,6 +145,11 @@ def runtime():
                                 votetxt = f"{total} votos contados ao total"
                             else:
                                 votetxt = f"{percent * 100:.2f}% de {total} votos"
+
+                            if total == 0:
+                                percent = 0
+                                judgment = "Não avaliado"
+                                votetxt = f"{total} votos contados ao total"
                             ftxt = f"# Veredito atual:" \
                                    f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
                                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
@@ -169,7 +174,7 @@ Voto | Quantidade | Porcentagem
 
                 etxt += """
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
-^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))"""
+^(Lucas Bot v2.0 - by [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin))"""
 
                 match judgment:
                     case 'Não é o babaca':
@@ -186,6 +191,8 @@ Voto | Quantidade | Porcentagem
                         submission.flair.select("17ace5be-6cd2-11ed-880b-f6403a5de3db")
                     case "Fake":
                         submission.flair.select("5c55d140-700a-11ed-8d83-1e3195d8e0d4")
+                    case "Não avaliado":
+                        submission.flair.select("528e0f44-7017-11ed-bf35-7a08e652fb3d")
 
                 for com in comments:
                     if com.author == "EuSouOBabacaBot":
