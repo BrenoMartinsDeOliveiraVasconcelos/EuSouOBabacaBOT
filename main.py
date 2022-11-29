@@ -8,7 +8,6 @@ from discord.ext import commands
 import os
 import psutil
 import datetime
-import time
 
 settings = json.load(open("config"))
 
@@ -50,13 +49,12 @@ def runtime():
                    f" Não disponível \n\nÚltima atualização feita em: " \
                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
             etxt = """
-            ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
-            ^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))"""
+^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
+^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))"""
             subcount = 0
             submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(settings["submissions"]))
 
             for submission in submissons:
-                submission.comment_sort = 'new'
                 rst = open("restart", "r").readlines()
                 if rst[0] == "1":
                     open("restart", "w+").write("0")
@@ -79,7 +77,7 @@ def runtime():
                     indx += 1
                     sublist[indx] = i.strip()
                 if submission.id not in sublist:
-                    botcomment = submission.reply(body=ftxt+botxt+etxt)
+                    botcomment = submission.reply(body=ftxt + botxt + etxt)
                     tools.logger(0, sub_id=submission.id)
                     botcomment.mod.distinguish(sticky=True)
                     botcomment.mod.lock()
@@ -87,6 +85,7 @@ def runtime():
                     sublist.append(submission.id)
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
+                submission.comment_sort = 'new'
                 submission.comments.replace_more(limit=None)
                 comments = submission.comments.list()
                 highest = 0
@@ -98,7 +97,6 @@ def runtime():
                 for comment in comments:
                     try:
                         if comment.author != 'EuSouOBabacaBOT' and comment.author not in users:
-                            users.append(comment.author)
                             comment_body = comment.body.split(' ')
                             indx = -1
                             for i in comment_body:
@@ -125,10 +123,6 @@ def runtime():
                             for r in rates:
                                 if r in rate:
                                     assholecount[r] += 1
-                                    counted = 1
-                                    break
-                            else:
-                                counted = 0
                             total = 0
                             for k, v in assholecount.items():
                                 total += v
@@ -139,30 +133,29 @@ def runtime():
                                 percent = highest / total
                             except ZeroDivisionError:
                                 percent = 1.00
-                            if counted == 1:
-                                judgment = "Não é o babaca" if key == "NEOB" else \
-                                            "É o babaca" if key == "EOB" else \
-                                            "Todo mundo é babaca" if key == "TEOB" else \
-                                            "Ninguém é o babaca" if key == "NGM" else \
-                                            "Falta informação" if key == "INFO" else \
-                                            "Fake"
+                            judgment = "Não é o babaca" if key == "NEOB" else \
+                                "É o babaca" if key == "EOB" else \
+                                "Todo mundo é babaca" if key == "TEOB" else \
+                                "Ninguém é o babaca" if key == "NGM" else \
+                                "Falta informação" if key == "INFO" else \
+                                "Fake"
 
-                                if percent < 0.50:
-                                    judgment = "Inconclusivo"
-                                    votetxt = f"{total} votos contados ao total"
-                                else:
-                                    votetxt = f"{percent * 100:.2f}% de {total} votos"
-                                ftxt = f"# Veredito atual:" \
-                                        f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
-                                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
-
+                            if percent < 0.50:
+                                judgment = "Inconclusivo"
+                                votetxt = f"{total} votos contados ao total"
+                            else:
+                                votetxt = f"{percent * 100:.2f}% de {total} votos"
+                            ftxt = f"# Veredito atual:" \
+                                   f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
+                                   f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
+                            users.append(comment.author)
                     except Exception as e:
                         tools.logger(2, ex=e)
 
                 percents = {}
                 for k, v in assholecount.items():
                     try:
-                        percents[k] = f"{(int(v)/total)*100:.2f}"
+                        percents[k] = f"{(int(v) / total) * 100:.2f}"
                     except ZeroDivisionError:
                         percents[k] = f"0.00"
 
@@ -178,16 +171,6 @@ Voto | Quantidade | Porcentagem
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^([Código fonte](https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT))"""
 
-                for com in comments:
-                    if com.author == "EuSouOBabacaBot":
-                        com.edit(
-                            body=ftxt + botxt + etxt)
-                        tools.logger(1, sub_id=submission.id)
-
-                ftxt = f"# Veredito atual:" \
-                        f" Não disponível \n\nÚltima atualização feita em: " \
-                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
-
                 match judgment:
                     case 'Não é o babaca':
                         submission.flair.select("fad0940c-6841-11ed-baed-365116e43406")
@@ -201,6 +184,18 @@ Voto | Quantidade | Porcentagem
                         submission.flair.select("562808bc-6842-11ed-8dd7-86bf8dba8041")
                     case "Inconclusivo":
                         submission.flair.select("17ace5be-6cd2-11ed-880b-f6403a5de3db")
+                    case "Fake":
+                        submission.flair.select("5c55d140-700a-11ed-8d83-1e3195d8e0d4")
+
+                for com in comments:
+                    if com.author == "EuSouOBabacaBot":
+                        com.edit(
+                            body=ftxt + botxt + etxt)
+                        tools.logger(1, sub_id=submission.id)
+
+                ftxt = f"# Veredito atual:" \
+                       f" Não disponível \n\nÚltima atualização feita em: " \
+                       f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
         except exceptions.ServerError:
             pass
 
@@ -227,7 +222,7 @@ if __name__ == '__main__':
             "memory_d": f"{psutil.Process(dpid).memory_info().rss / 1024 ** 2:.0f} mb",
             "memory_rd": f"{psutil.Process(rpid).memory_info().rss / 1024 ** 2:.0f} mb",
             "memory_total": f""
-            f"{(psutil.Process(dpid).memory_info().rss/1024**2)+(psutil.Process(rpid).memory_info().rss/1024**2):.0f} "
+                            f"{(psutil.Process(dpid).memory_info().rss/1024**2)+(psutil.Process(rpid).memory_info().rss/1024**2):.0f}"
                             f"mb",
             "cpu_d": f"{psutil.Process(dpid).cpu_percent() * 100:.3f}%",
             "cpu_rd": f"{psutil.Process(rpid).cpu_percent() * 100:.3f}%",
