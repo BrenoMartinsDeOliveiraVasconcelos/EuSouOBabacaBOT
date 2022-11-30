@@ -9,7 +9,16 @@ import os
 import psutil
 import datetime
 
-settings = json.load(open("config"))
+config = json.load(open('config', 'r'))
+
+settings = {
+    "clientid": os.getenv("clientid"),
+    "clientsecret": os.getenv("clientsecret"),
+    "username": os.getenv("rusername"),
+    "password": os.getenv("password"),
+    "discord_token": os.getenv("discord_token"),
+    "submissions": config['submissions']
+}
 
 reddit = praw.Reddit(
     user_agent='<Linux>:<reddit-bot>:<v2.0> (by /u/JakeWisconsin)',
@@ -150,7 +159,6 @@ def runtime():
                                 votetxt = f"{percent * 100:.2f}% de {total} votos"
 
                             if total == 0:
-                                percent = 0
                                 judgment = "Não avaliado"
                                 votetxt = f"{total} votos contados ao total"
                             ftxt = f"# Veredito atual:" \
