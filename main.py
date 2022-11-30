@@ -83,6 +83,7 @@ def runtime():
                     botcomment.mod.lock()
                     botcomment.mod.approve()
                     sublist.append(submission.id)
+                    submission.flair.select("5462ec04-70c6-11ed-8642-aa07fd483ac4")
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
                 submission.comment_sort = 'new'
@@ -96,7 +97,8 @@ def runtime():
 
                 for comment in comments:
                     try:
-                        if comment.author != 'EuSouOBabacaBOT' and comment.author not in users:
+                        if comment.author != 'EuSouOBabacaBOT' and comment.author not in users \
+                                and comment.author != submission.author:
                             comment_body = comment.body.split(' ')
                             indx = -1
                             for i in comment_body:
@@ -123,6 +125,7 @@ def runtime():
                             for r in rates:
                                 if r in rate:
                                     assholecount[r] += 1
+                                    break
                             total = 0
                             for k, v in assholecount.items():
                                 total += v
