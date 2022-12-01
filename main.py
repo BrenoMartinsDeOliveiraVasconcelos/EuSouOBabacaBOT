@@ -9,6 +9,7 @@ import os
 import psutil
 import datetime
 import random
+import traceback
 
 config = json.load(open('config', 'r'))
 
@@ -215,8 +216,8 @@ Voto | Quantidade | Porcentagem
                 ftxt = f"# Veredito atual:" \
                        f" Não disponível \n\nÚltima atualização feita em: " \
                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
-        except exceptions.ServerError:
-            pass
+        except Exception as e:
+            tools.logger(2, ex=traceback.format_exc())
 
 
 if __name__ == '__main__':
