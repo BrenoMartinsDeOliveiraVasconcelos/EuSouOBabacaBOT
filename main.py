@@ -8,6 +8,7 @@ from discord.ext import commands
 import os
 import psutil
 import datetime
+import random
 
 config = json.load(open('config', 'r'))
 
@@ -227,6 +228,7 @@ if __name__ == '__main__':
     discord_token = settings["discord_token"]
 
 
+    @commands.has_permissions(administrator=True)
     @bot.command(name="ping", help="Pong!")
     async def ping(ctx):
         await ctx.send("Pong!")
@@ -253,6 +255,7 @@ if __name__ == '__main__':
         await ctx.send("Log", file=discord.File(r"log"))
 
 
+    @commands.has_permissions(administrator=True)
     @bot.command(name="reiniciar", help="Reinicia a sessão no reddit")
     async def reset(ctx):
         await ctx.send("Ok")
@@ -260,6 +263,7 @@ if __name__ == '__main__':
         await ctx.send("Pronto.")
 
 
+    @commands.has_permissions(administrator=True)
     @bot.command(name="log", help="Retorna o arquivo de log caso não tenha um argumento"
                                   "\nCaso tenha o argumento 'limpar', limpa o arquivo de log")
     async def send_log(ctx, *args):
@@ -271,6 +275,7 @@ if __name__ == '__main__':
             open("log", "w+").write("")
 
 
+    @commands.has_permissions(administrator=True)
     @bot.command(name="fechar", help="Fecha o programa ou o bot.\n"
                                      "\n'bot' fecha apenas a sessão do bot"
                                      "\np'programa' fecha o programa inteiro. Pode ser"
@@ -300,5 +305,18 @@ if __name__ == '__main__':
 
         open("config", "w+").write(json.dumps(settings, indent=4))
 
+
+    @bot.command(name="publicar")
+    async def submit(ctx, *args):
+        ids = open("anon_submits/ids.txt", "r", encoding='utf-8').readline().split("\n")
+        gen_id = random.randint(0, 1_000_000)
+
+        while gen_id in ids:
+            gen_id = random.randint(0, 1_000_000)
+
+        open(f"anon_submits/{gen_id}", "w+", encoding='utf-8').write(" ".join(args))
+        open("anon_submits/ids.txt", "a", encoding='utf-8').write(str(gen_id)+"\n-")
+
+        await ctx.message.delete()
 
     bot.run(discord_token)
