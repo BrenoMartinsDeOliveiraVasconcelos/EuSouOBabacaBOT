@@ -21,5 +21,5 @@ def logger(tp, sub_id="", ex="", num="", reason=""):
     elif tp == 4:
         msg = f"[{current_time}] {sub_id} foi removido. MOTIVO: {reason}"
 
-    multiprocessing.Process(target=logit, args=(msg, )).start()
+    logit(msg)
     print(msg)

@@ -1,6 +1,5 @@
 import praw
 import json
-from prawcore import exceptions
 import tools
 import multiprocessing
 import discord
@@ -8,7 +7,6 @@ from discord.ext import commands
 import os
 import psutil
 import datetime
-import random
 import traceback
 
 config = json.load(open('config', 'r'))
@@ -57,7 +55,7 @@ def runtime():
     while True:
         try:
             ftxt = f"# Veredito atual:" \
-                   f" Não disponível \n\nÚltima atualização feita em: " \
+                   f" Não processado ainda \n\nÚltima atualização feita em: " \
                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
             etxt = """
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
@@ -103,8 +101,8 @@ def runtime():
                 highest = 0
                 key = ''
                 users = []
-                judgment = ""
                 total = 0
+                judgment = ""
 
                 for comment in comments:
                     try:
@@ -164,7 +162,7 @@ def runtime():
                                 judgment = "Não avaliado"
                                 votetxt = f"{total} votos contados ao total"
                             ftxt = f"# Veredito atual:" \
-                                   f" {judgment} ({votetxt})\n\nÚltima atualização feita em: " \
+                                   f"{judgment} ({votetxt})\n\nÚltima atualização feita em: " \
                                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
                             users.append(comment.author)
                     except Exception as e:
@@ -177,9 +175,10 @@ def runtime():
                     except ZeroDivisionError:
                         percents[k] = f"0.00"
 
+                tools.logger(2, ex="Submissão analizada!")
                 etxt = f"""
 # Tabela de votos
-Voto | Quantidade | Porcentagem
+Voto | Quantidade | %
 :--:|:--:|:--:
 """
                 for k, v in assholecount.items():
@@ -207,8 +206,11 @@ Voto | Quantidade | Porcentagem
                     case "Não avaliado":
                         submission.flair.select("528e0f44-7017-11ed-bf35-7a08e652fb3d")
 
+                tools.logger(2, ex=f"Flair editada em {submission.id}")
                 for com in comments:
                     if com.author == "EuSouOBabacaBot":
+                        if subcount >= int(config["submissions"]):
+                            ftxt += "# Essa publicação será mais atualizada!\n\n"
                         com.edit(
                             body=ftxt + botxt + etxt)
                         tools.logger(1, sub_id=submission.id)
@@ -216,7 +218,7 @@ Voto | Quantidade | Porcentagem
                 ftxt = f"# Veredito atual:" \
                        f" Não disponível \n\nÚltima atualização feita em: " \
                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
-        except Exception as e:
+        except Exception:
             tools.logger(2, ex=traceback.format_exc())
 
 
@@ -243,8 +245,8 @@ if __name__ == '__main__':
             "memory_d": f"{psutil.Process(dpid).memory_info().rss / 1024 ** 2:.0f} mb",
             "memory_rd": f"{psutil.Process(rpid).memory_info().rss / 1024 ** 2:.0f} mb",
             "memory_total": f""
-                            f"{(psutil.Process(dpid).memory_info().rss/1024**2)+(psutil.Process(rpid).memory_info().rss/1024**2):.0f}"
-                            f"mb",
+            f"{(psutil.Process(dpid).memory_info().rss/1024**2)+(psutil.Process(rpid).memory_info().rss/1024**2):.0f}"
+            f"mb",
             "cpu_d": f"{psutil.Process(dpid).cpu_percent() * 100:.3f}%",
             "cpu_rd": f"{psutil.Process(rpid).cpu_percent() * 100:.3f}%",
             "cpu_total": f"{psutil.Process(dpid).cpu_percent() * 100 + psutil.Process(rpid).cpu_percent() * 100:.3f}%",
@@ -305,19 +307,5 @@ if __name__ == '__main__':
                 await ctx.send(f"{settings}")
 
         open("config", "w+").write(json.dumps(settings, indent=4))
-
-
-    @bot.command(name="publicar")
-    async def submit(ctx, *args):
-        ids = open("anon_submits/ids.txt", "r", encoding='utf-8').readline().split("\n")
-        gen_id = random.randint(0, 1_000_000)
-
-        while gen_id in ids:
-            gen_id = random.randint(0, 1_000_000)
-
-        open(f"anon_submits/{gen_id}", "w+", encoding='utf-8').write(" ".join(args))
-        open("anon_submits/ids.txt", "a", encoding='utf-8').write(str(gen_id)+"\n-")
-
-        await ctx.message.delete()
 
     bot.run(discord_token)
