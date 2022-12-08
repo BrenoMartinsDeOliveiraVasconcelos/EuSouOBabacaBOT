@@ -32,7 +32,7 @@ reddit = praw.Reddit(
 botxt = \
     """Vou contar as respostas que as pessoas dão nesse post! Pra ser contado, responda com essas siglas o post:
 
-NEOB - Não é o babaca
+NEOB - Não é o babaca (E o resto sim)
 
 EOB - É o babaca 
 
@@ -161,7 +161,7 @@ def runtime():
                             if total == 0:
                                 judgment = "Não avaliado"
                                 votetxt = f"{total} votos contados ao total"
-                            ftxt = f"# Veredito atual:" \
+                            ftxt = f"# Veredito atual: " \
                                    f"{judgment} ({votetxt})\n\nÚltima atualização feita em: " \
                                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
                             users.append(comment.author)
