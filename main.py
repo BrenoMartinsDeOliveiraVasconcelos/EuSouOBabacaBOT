@@ -10,13 +10,14 @@ import datetime
 import traceback
 
 config = json.load(open('config', 'r'))
+api = json.load(open("private/0.json"))
 
 settings = {
-    "clientid": os.getenv("clientid"),
-    "clientsecret": os.getenv("clientsecret"),
-    "username": os.getenv("rusername"),
-    "password": os.getenv("password"),
-    "discord_token": os.getenv("discord_token"),
+    "clientid": api["clientid"],
+    "clientsecret": api["clientsecret"],
+    "username": api["rusername"],
+    "password": api["password"],
+    "discord_token": api["discord_token"],
     "submissions": config['submissions']
 }
 
