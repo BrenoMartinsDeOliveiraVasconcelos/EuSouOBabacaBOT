@@ -1,5 +1,6 @@
 import datetime
-import multiprocessing
+import os
+import platform
 
 
 def logit(msg):
@@ -11,15 +12,24 @@ def logger(tp, sub_id="", ex="", num="", reason=""):
     msg = ""
 
     if tp == 0:
-        msg = f"[{current_time}] Comentário enviado em {sub_id}"
+        msg = f"Comentário enviado em {sub_id}"
     elif tp == 1:
-        msg = f"[{current_time}] Comentário editado em {sub_id}"
+        msg = f"Comentário editado em {sub_id}"
     elif tp == 2:
-        msg = f"[{current_time}] {ex}"
+        msg = f"{ex}"
     elif tp == 3:
-        msg = f"[{current_time}] Número {num}"
+        msg = f"Número {num}"
     elif tp == 4:
-        msg = f"[{current_time}] {sub_id} foi removido. MOTIVO: {reason}"
+        msg = f"{sub_id} foi removido. MOTIVO: {reason}"
 
-    logit(msg)
-    print(msg)
+    logit(f"[{current_time}] "+msg)
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        os.system("clear")
+
+    print(f"""Beep bop!
+Ação mais recente: {msg}
+Horário do evento: {current_time}    
+Rodando em: {platform.system()} {''.join(platform.version())} {' '.join(platform.architecture())} 
+Python: {' '.join(platform.python_build())}""")

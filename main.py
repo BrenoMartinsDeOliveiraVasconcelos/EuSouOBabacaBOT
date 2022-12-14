@@ -107,7 +107,7 @@ def runtime():
 
                 for comment in comments:
                     try:
-                        if comment.author != 'EuSouOBabacaBOT' and comment.author not in users \
+                        if comment.author != settings["username"] and comment.author not in users \
                                 and comment.author != submission.author:
                             comment_body = comment.body.split(' ')
                             indx = -1
