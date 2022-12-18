@@ -310,3 +310,5 @@ if __name__ == '__main__':
         open("config", "w+").write(json.dumps(settings, indent=4))
 
     bot.run(discord_token)
+
+print("Boom")
