@@ -54,11 +54,13 @@ Nota: Eu não conto respostas a comentários, somente comentários.
 def runtime():
     reddit.validate_on_submit = True
     while True:
+        first_analysis = False
         try:
             ftxt = f"# Veredito atual:" \
                    f" Não processado ainda \n\nÚltima atualização feita em: " \
                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
             etxt = """
+            
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^(Lucas Bot v2.0 - by [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin))"""
             subcount = 0
@@ -87,10 +89,10 @@ def runtime():
                     indx += 1
                     sublist[indx] = i.strip()
                 if submission.id not in sublist:
+                    first_analysis = True
                     botcomment = submission.reply(body=ftxt + botxt + etxt)
                     tools.logger(0, sub_id=submission.id)
                     botcomment.mod.distinguish(sticky=True)
-                    botcomment.mod.lock()
                     botcomment.mod.approve()
                     sublist.append(submission.id)
                     submission.flair.select("5462ec04-70c6-11ed-8642-aa07fd483ac4")
@@ -186,6 +188,7 @@ Voto | Quantidade | %
                     etxt += f"{k} | {v} | {percents[k]}%\n"
 
                 etxt += """
+                                
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^(Lucas Bot v2.0 - by [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin))"""
 
@@ -206,14 +209,35 @@ Voto | Quantidade | %
                         submission.flair.select("5c55d140-700a-11ed-8d83-1e3195d8e0d4")
                     case "Não avaliado":
                         submission.flair.select("528e0f44-7017-11ed-bf35-7a08e652fb3d")
+                rtxt = """
 
+# O OP não deu uma explicação sobre seus motivos! Se você for o OP, responda a esse comentário contando o por que de você achar que é (ou não é)!"""
+
+                if not os.path.exists(f"reasons/{submission.id}"):
+                    for rep in comments:
+                        if rep.author == "EuSouOBabacaBOT":
+                            for reps in rep.replies:
+                                if reps.author == submission.author:
+                                    rtxt = f"""
+                                    
+# A explicação do motivo do OP achar que é (ou não) o babaca é:
+>{reps.body}
+                                    """
+                                    open(f"reasons/{submission.id}", "w+").write(reps.body)
+                else:
+                    rtxt = f"""
+                                    
+# A explicação do motivo do OP achar que é (ou não) o babaca é:
+>{open(f"reasons/{submission.id}", "r").readline()}
+
+"""
                 tools.logger(2, ex=f"Flair editada em {submission.id}")
                 for com in comments:
                     if com.author == "EuSouOBabacaBot":
                         if subcount >= int(config["submissions"]):
                             ftxt += "# Essa publicação será mais atualizada!\n\n"
                         com.edit(
-                            body=ftxt + botxt + etxt)
+                            body=ftxt + botxt + rtxt + etxt)
                         tools.logger(1, sub_id=submission.id)
 
                 ftxt = f"# Veredito atual:" \
@@ -228,12 +252,12 @@ if __name__ == '__main__':
     bot_thread.start()
 
     intents = discord.Intents().all()
-    bot = commands.Bot(command_prefix="/", intents=intents)
+    bot = commands.Bot(command_prefix="l!", intents=intents)
     discord_token = settings["discord_token"]
 
 
     @commands.has_permissions(administrator=True)
-    @bot.command(name="ping", help="Pong!")
+    @bot.command(name="pingar", help="Pong!")
     async def ping(ctx):
         await ctx.send("Pong!")
         dpid = os.getpid()
@@ -268,7 +292,7 @@ if __name__ == '__main__':
 
 
     @commands.has_permissions(administrator=True)
-    @bot.command(name="log", help="Retorna o arquivo de log caso não tenha um argumento"
+    @bot.command(name="envlog", help="Retorna o arquivo de log caso não tenha um argumento"
                                   "\nCaso tenha o argumento 'limpar', limpa o arquivo de log")
     async def send_log(ctx, *args):
         if len(args) == 0:
@@ -298,7 +322,7 @@ if __name__ == '__main__':
                 exit(0)
 
 
-    @bot.command(name="configurar", help="Troca a configuração no arquivo json 'config'. 'mostrar' para "
+    @bot.command(administrator=True, name="configurar", help="Troca a configuração no arquivo json 'config'. 'mostrar' para "
                                          "mostrar as configurações atuais. <key> <value> para alterar.")
     async def config(ctx, *args):
         if len(args) >= 2:
@@ -309,6 +333,31 @@ if __name__ == '__main__':
 
         open("config", "w+").write(json.dumps(settings, indent=4))
 
-    bot.run(discord_token)
 
-print("Boom")
+    @bot.event
+    async def on_message(message):
+        if message.content.startswith("r "):
+            await message.channel.send(f"{message.author.mention} mandou um relato!")
+            embedVar = discord.Embed(title=f"Mandaram um relato!", description="Você pode mandar um também digitando "
+                                                                              "seu relato com 'r' no começo! "
+                                                                              "(Não se esqueça de colocar um espaço depois do r)", color=0x00ff00)
+            embedVar.add_field(name="O texto do relato", value=f"*{' '.join(message.content.split(' ')[1:])}*",
+                               inline=False)
+            embedVar.add_field(name="Julgue o relato usando as reações a seguir", value="""
+👍 - Não é o babaca            
+👎 - É o babaca
+😡 - Todo mundo é o babaca
+💗 - Ninguém é o babaca
+❔ - Falta informação
+🤥 - Relato fake
+            """, inline=False)
+            botmsg = await message.channel.send(embed=embedVar)
+
+            emojis = ["👍", "👎", "😡", "💗", "❔", "🤥"]
+
+            for i in emojis:
+                await botmsg.add_reaction(i)
+
+        await bot.process_commands(message)
+
+    bot.run(discord_token)
