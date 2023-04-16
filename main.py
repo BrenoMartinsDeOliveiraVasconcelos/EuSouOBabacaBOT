@@ -2,27 +2,27 @@ import praw
 import json
 import tools
 import multiprocessing
-import discord
-from discord.ext import commands
-import os
-import psutil
+import shutil
+import time
 import datetime
 import traceback
 
-config = json.load(open('config', 'r'))
-api = json.load(open("private/0.json"))
+config = json.load(open('config.json', 'r'))
+api = json.load(open("api.json"))
 
 settings = {
     "clientid": api["clientid"],
     "clientsecret": api["clientsecret"],
     "username": api["rusername"],
     "password": api["password"],
-    "discord_token": api["discord_token"],
-    "submissions": config['submissions']
+    "useragent": api["useragent"],
+    "submissions": config['submissions'],
+    "subreddit": config["subreddit"],
+    "backup": config["backup"]
 }
 
 reddit = praw.Reddit(
-    user_agent='<Linux>:<reddit-bot>:<v2.0> (by /u/JakeWisconsin)',
+    user_agent=settings["useragent"],
     client_id=settings["clientid"],
     client_secret=settings["clientsecret"],
     username=settings["username"],
@@ -41,9 +41,9 @@ NGM - Ninguem (é o babaca)
 
 TEOB - Todo mundo é o babaca 
 
-INFO - Falta informação 
+INFO - Falta informaçã
 
-FANFIC - Quando é fanfic
+FANFIC - Quando algo é obviamente falso 
 
 Demora um pouco até eu contar tudo, então espere alguns minutos... Ou sei lá, tanto faz.
 
@@ -53,8 +53,9 @@ Nota: Eu não conto respostas a comentários, somente comentários.
 
 def runtime():
     reddit.validate_on_submit = True
+    current_loop = int("".join(open("last", "r").readlines()).replace('\n', ''))
     while True:
-        first_analysis = False
+        current_loop += 1
         try:
             ftxt = f"# Veredito atual:" \
                    f" Não processado ainda \n\nÚltima atualização feita em: " \
@@ -64,32 +65,35 @@ def runtime():
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^(Lucas Bot v2.0 - by [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin))"""
             subcount = 0
-            submissons = reddit.subreddit('EuSOuOBabaca').new(limit=int(settings["submissions"]))
+            submissons = reddit.subreddit(settings["subreddit"]).new(limit=int(settings["submissions"]))
+            adds = ""
+            edits = ""
+            flairchanges = ""
+            table = ""
+            atime = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
 
             for submission in submissons:
-                rst = open("restart", "r").readlines()
-                if rst[0] == "1":
-                    open("restart", "w+").write("0")
-                    tools.logger(tp=2, ex="Bot reiniciado remotamente.")
-                    break
-                subcount += 1
-                open("last", "w+").write(f"{subcount}")
-                tools.logger(tp=3, num=subcount)
                 assholecount = {
                     "NEOB": 0,
                     "EOB": 0,
                     "NGM": 0,
                     "TEOB": 0,
                     "INFO": 0,
-                    "FANFIC": 0
+                    "FANFIC": 0,
                 }
+                rst = open("restart", "r").readlines()
+                if rst[0] == "1":
+                    open("restart", "w+").write("0")
+                    tools.logger(tp=2, ex="Bot reiniciado remotamente.")
+                    break
+                subcount += 1
+                tools.logger(tp=3, num=subcount, sub_id=submission.id)
                 sublist = open('idlist', 'r').readlines()
                 indx = -1
                 for i in sublist:
                     indx += 1
                     sublist[indx] = i.strip()
                 if submission.id not in sublist:
-                    first_analysis = True
                     botcomment = submission.reply(body=ftxt + botxt + etxt)
                     tools.logger(0, sub_id=submission.id)
                     botcomment.mod.distinguish(sticky=True)
@@ -98,6 +102,7 @@ def runtime():
                     submission.flair.select("5462ec04-70c6-11ed-8642-aa07fd483ac4")
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
+                    adds += f"\n* Adicionado https://www.reddit.com/{submission.id} a lista de ids.\n"
                 submission.comment_sort = 'new'
                 submission.comments.replace_more(limit=None)
                 comments = submission.comments.list()
@@ -152,8 +157,7 @@ def runtime():
                                 "É o babaca" if key == "EOB" else \
                                 "Todo mundo é babaca" if key == "TEOB" else \
                                 "Ninguém é o babaca" if key == "NGM" else \
-                                "Falta informação" if key == "INFO" else \
-                                "Fake"
+                                "Falta informação" if key == "INFO" else "Fake"
 
                             if percent < 0.50:
                                 judgment = "Inconclusivo"
@@ -177,8 +181,10 @@ def runtime():
                         percents[k] = f"{(int(v) / total) * 100:.2f}"
                     except ZeroDivisionError:
                         percents[k] = f"0.00"
-
+                with open(f"rates/{submission.id}.json", "w") as json_file:
+                    json.dump(assholecount, json_file, indent=4)
                 tools.logger(2, ex="Submissão analizada!")
+
                 etxt = f"""
 # Tabela de votos
 Voto | Quantidade | %
@@ -186,12 +192,11 @@ Voto | Quantidade | %
 """
                 for k, v in assholecount.items():
                     etxt += f"{k} | {v} | {percents[k]}%\n"
-
+                table += f"\n* A tabela de https://www.reddit.com/{submission.id} agora é:\n\n{etxt}\n"
                 etxt += """
                                 
 ^(Eu sou um robô e esse comentário foi feito automáticamente. Beep bop!) 
 ^(Lucas Bot v2.0 - by [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin))"""
-
                 match judgment:
                     case 'Não é o babaca':
                         submission.flair.select("fad0940c-6841-11ed-baed-365116e43406")
@@ -205,159 +210,87 @@ Voto | Quantidade | %
                         submission.flair.select("562808bc-6842-11ed-8dd7-86bf8dba8041")
                     case "Inconclusivo":
                         submission.flair.select("17ace5be-6cd2-11ed-880b-f6403a5de3db")
-                    case "Fake":
-                        submission.flair.select("5c55d140-700a-11ed-8d83-1e3195d8e0d4")
                     case "Não avaliado":
                         submission.flair.select("528e0f44-7017-11ed-bf35-7a08e652fb3d")
-                rtxt = """
+                    case "Fake":
+                        submission.flair.select("5c55d140-700a-11ed-8d83-1e3195d8e0d4")
 
-# O OP não deu uma explicação sobre seus motivos! Se você for o OP, responda a esse comentário contando o por que de você achar que é (ou não é)!"""
+                        
 
-                if not os.path.exists(f"reasons/{submission.id}"):
-                    for rep in comments:
-                        if rep.author == "EuSouOBabacaBOT":
-                            for reps in rep.replies:
-                                if reps.author == submission.author:
-                                    rtxt = f"""
-                                    
-# A explicação do motivo do OP achar que é (ou não) o babaca é:
->{reps.body}
-                                    """
-                                    open(f"reasons/{submission.id}", "w+").write(reps.body)
-                else:
-                    rtxt = f"""
-                                    
-# A explicação do motivo do OP achar que é (ou não) o babaca é:
->{open(f"reasons/{submission.id}", "r").readline()}
-
-"""
+                flairchanges += f"\n* Flair de https://www.reddit.com/{submission.id} é '{judgment}'"
                 tools.logger(2, ex=f"Flair editada em {submission.id}")
                 for com in comments:
-                    if com.author == "EuSouOBabacaBot":
-                        if subcount >= int(config["submissions"]):
+                    if com.author == f"{settings['username']}":
+                        bd = com.body.split("\n")
+                        if subcount >= int(settings["submissions"]):
                             ftxt += "# Essa publicação será mais atualizada!\n\n"
-                        com.edit(
-                            body=ftxt + botxt + rtxt + etxt)
-                        tools.logger(1, sub_id=submission.id)
-
+                        if ">!NOEDIT!<" not in bd:
+                            com.edit(
+                                body=ftxt + botxt + etxt)
+                            tools.logger(1, sub_id=submission.id)
+                            edits += f"\n* Comentário do bot editado em https://www.reddit.com/{submission.id}\n"
                 ftxt = f"# Veredito atual:" \
                        f" Não disponível \n\nÚltima atualização feita em: " \
                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
-        except Exception:
+                btime = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+            satxt = f""""# Adioções na lista de ids:
+{adds}"""
+            setxt = f"""
+# Edições de comentário:
+{edits}"""
+            sftxt = f""" 
+# Edições de flair de posts:
+{flairchanges}
+"""
+            sttxt = f""" 
+# Tabelas
+{table}
+"""
+            reddit.subreddit("EuSouOBabacaBOT").submit(f"[ADD] LOG PARA O LOOP NUMERO {current_loop} ({atime} até {btime})",
+                                                       selftext=satxt)
+            reddit.subreddit("EuSouOBabacaBOT").submit(
+                f"[EDIT] LOG PARA O LOOP NUMERO {current_loop} ({atime} até {btime})",
+                selftext=setxt)
+            reddit.subreddit("EuSouOBabacaBOT").submit(
+                f"[FLAIR] LOG PARA O LOOP NUMERO {current_loop} ({atime} até {btime})",
+                selftext=sftxt)
+            open("last", "w+").write(f"{current_loop}")
+        except Exception as e:
             tools.logger(2, ex=traceback.format_exc())
+            reddit.subreddit("EuSouOBabacaBOT").submit(
+                f"ERRO! {e.__cause__}", selftext="u/JakeWisconsin\n\n"+traceback.format_exc())
+
+
+def backup():
+    while True:
+        try:
+            folder = f"{settings['backup']}/{datetime.datetime.now().strftime('%Y-%m-%d/%H-%M-%S')}"
+            src = "."
+            shutil.copytree(src, folder, ignore=shutil.ignore_patterns("venv", ".", "__"))
+            print("Copiado")
+            reddit.subreddit("EuSouOBabacaBOT").submit(
+                f"Backup realizado",
+                selftext=f"Diretório: {folder}")
+        except:
+            reddit.subreddit("EuSouOBabacaBOT").submit(
+                f"Erro na função de backup",
+                selftext=f"{traceback.format_exc()}\n\nu/JakeWisconsin")
+        time.sleep(3600)
+
+
+def clearlog():
+    while True:
+        time.sleep(86400)
+        open("log", "w+").write("")
+        reddit.subreddit("EuSouOBabacaBOT").submit(
+            f"Arquivo de log limpo",
+            selftext=f"Log limpo em {datetime.datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}. u/JakeWisconsin")
 
 
 if __name__ == '__main__':
-    bot_thread = multiprocessing.Process(target=runtime, args=(), )
-    bot_thread.start()
+    multiprocessing.Process(target=runtime, args=[]).start()
+    multiprocessing.Process(target=backup, args=[]).start()
+    multiprocessing.Process(target=clearlog, args=[]).start()
 
-    intents = discord.Intents().all()
-    bot = commands.Bot(command_prefix="l!", intents=intents)
-    discord_token = settings["discord_token"]
-
-
-    @commands.has_permissions(administrator=True)
-    @bot.command(name="pingar", help="Pong!")
-    async def ping(ctx):
-        await ctx.send("Pong!")
-        dpid = os.getpid()
-        rpid = bot_thread.pid
-        pingdict = {
-            "is_alive": bot_thread.is_alive(), "current_post": open("last", "r").readline().strip("\n"),
-            "log_size": f'{os.stat("log").st_size / 1024:.0f} kb',
-            "reddit_thread_pid": rpid,
-            "discord_pid": dpid,
-            "memory_d": f"{psutil.Process(dpid).memory_info().rss / 1024 ** 2:.0f} mb",
-            "memory_rd": f"{psutil.Process(rpid).memory_info().rss / 1024 ** 2:.0f} mb",
-            "memory_total": f""
-            f"{(psutil.Process(dpid).memory_info().rss/1024**2)+(psutil.Process(rpid).memory_info().rss/1024**2):.0f}"
-            f"mb",
-            "cpu_d": f"{psutil.Process(dpid).cpu_percent() * 100:.3f}%",
-            "cpu_rd": f"{psutil.Process(rpid).cpu_percent() * 100:.3f}%",
-            "cpu_total": f"{psutil.Process(dpid).cpu_percent() * 100 + psutil.Process(rpid).cpu_percent() * 100:.3f}%",
-        }
-
-        for k, v in pingdict.items():
-            await ctx.send(f"{k} = {v}")
-
-        await ctx.send("Log", file=discord.File(r"log"))
-
-
-    @commands.has_permissions(administrator=True)
-    @bot.command(name="reiniciar", help="Reinicia a sessão no reddit")
-    async def reset(ctx):
-        await ctx.send("Ok")
-        open("restart", "w+").write("1")
-        await ctx.send("Pronto.")
-
-
-    @commands.has_permissions(administrator=True)
-    @bot.command(name="envlog", help="Retorna o arquivo de log caso não tenha um argumento"
-                                  "\nCaso tenha o argumento 'limpar', limpa o arquivo de log")
-    async def send_log(ctx, *args):
-        if len(args) == 0:
-            await ctx.send("Aqui está!")
-            await ctx.send(".", file=discord.File(r"log"))
-        elif args[0] == "limpar":
-            await ctx.send("Ok")
-            open("log", "w+").write("")
-
-
-    @commands.has_permissions(administrator=True)
-    @bot.command(name="fechar", help="Fecha o programa ou o bot.\n"
-                                     "\n'bot' fecha apenas a sessão do bot"
-                                     "\np'programa' fecha o programa inteiro. Pode ser"
-                                     "necessário entrar no servidor para iniciar de novo.")
-    async def close(ctx, *args):
-        if len(args) > 0:
-            tools.logger(tp=2, ex="Bot ou programa fechado remotamente.")
-            if args[0] == "bot":
-                await ctx.send("Blz")
-                try:
-                    bot_thread.terminate()
-                except (AssertionError, AttributeError):
-                    pass
-            elif args[0] == "programa":
-                await ctx.send("Se é isso que você quer, tanto faz pra mim.")
-                exit(0)
-
-
-    @bot.command(administrator=True, name="configurar", help="Troca a configuração no arquivo json 'config'. 'mostrar' para "
-                                         "mostrar as configurações atuais. <key> <value> para alterar.")
-    async def config(ctx, *args):
-        if len(args) >= 2:
-            settings[args[0]] = args[1]
-        elif len(args) == 1:
-            if args[0] == "mostrar":
-                await ctx.send(f"{settings}")
-
-        open("config", "w+").write(json.dumps(settings, indent=4))
-
-
-    @bot.event
-    async def on_message(message):
-        if message.content.startswith("r "):
-            await message.channel.send(f"{message.author.mention} mandou um relato!")
-            embedVar = discord.Embed(title=f"Mandaram um relato!", description="Você pode mandar um também digitando "
-                                                                              "seu relato com 'r' no começo! "
-                                                                              "(Não se esqueça de colocar um espaço depois do r)", color=0x00ff00)
-            embedVar.add_field(name="O texto do relato", value=f"*{' '.join(message.content.split(' ')[1:])}*",
-                               inline=False)
-            embedVar.add_field(name="Julgue o relato usando as reações a seguir", value="""
-👍 - Não é o babaca            
-👎 - É o babaca
-😡 - Todo mundo é o babaca
-💗 - Ninguém é o babaca
-❔ - Falta informação
-🤥 - Relato fake
-            """, inline=False)
-            botmsg = await message.channel.send(embed=embedVar)
-
-            emojis = ["👍", "👎", "😡", "💗", "❔", "🤥"]
-
-            for i in emojis:
-                await botmsg.add_reaction(i)
-
-        await bot.process_commands(message)
-
-    bot.run(discord_token)
+    while True:
+        continue

@@ -1,4 +1,3 @@
 praw
-discord
 psutil==5.9.4
 prawcore

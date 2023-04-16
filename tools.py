@@ -18,7 +18,7 @@ def logger(tp, sub_id="", ex="", num="", reason=""):
     elif tp == 2:
         msg = f"{ex}"
     elif tp == 3:
-        msg = f"Número {num}"
+        msg = f"Número {num} ({sub_id})"
     elif tp == 4:
         msg = f"{sub_id} foi removido. MOTIVO: {reason}"
 
