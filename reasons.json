@@ -1,0 +1,10 @@
+{
+  "FAKE_OT": {
+    "note": "Não se encaixa no sub",
+    "body": "Seu post recebeu uma quantidade significativa de votos FANFIC ou OT portanto, será removido. Se acredita que houve um egano, envie um modmail para a moderação."
+  },
+  "TEXTWALL": {
+    "note": "Parede de texto",
+    "body": "Sua submissão foi removida por não ter parágrafos e/ou linhas suficientes. O post deverá ter no mínimo 2 parágrafos com 2 frases cada. Caso haja um erro, envie um modmail para a moderação."
+  }
+}

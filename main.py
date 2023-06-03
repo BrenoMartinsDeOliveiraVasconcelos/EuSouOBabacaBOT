@@ -7,12 +7,12 @@ import time
 import datetime
 import traceback
 import random
-import psutil
 import os
 
 config = json.load(open('config.json', 'r'))
 api = json.load(open("api.json"))
 splashes = json.load(open('splashes.json', 'r'))
+reasons = json.load(open("reasons.json", "r"))
 
 settings = {
     "clientid": api["clientid"],
@@ -37,17 +37,16 @@ reddit = praw.Reddit(
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
-botxt = f"\n\n**{config['upper_text']}**\n\nVou contar as respostas que as pessoas dão nesse post! Pra ser contado, responda com essas siglas o post:\n\n"
+botxt = f"\n\n**{config['upper_text']}**\n\nVou contar as respostas que as pessoas dão nesse post! Pra ser contado, " \
+        f"responda com essas siglas o post:\n\n"
 
 votxt = ["", "", ""]
 for k, v in flairs.items():
     votxt[v[1]] += f"{k} - {v[2]}\n\n"
 
 botxt += votxt[0] + "**Votos especiais**\n\n" + votxt[1] + "\n\n"
+botxt += "##Nota: Pode demorar cerca de 2 horas para atualizar!\n\n"
 
-botxt+= "##Nota: Pode demorar cerca de 2 horas para atualizar!\n\n"
-
-joke = ""
 
 def runtime():
     reddit.validate_on_submit = True
@@ -61,7 +60,6 @@ def runtime():
             adds = ""
             edits = ""
             flairchanges = ""
-            table = ""
             atime = datetime.datetime.now().timestamp()
 
             for submission in submissons:
@@ -73,17 +71,17 @@ def runtime():
 *{config['info']['name']} v{config['info']['version']} - by [{config['info']['creator']}](https://www.reddit.com/u/{config['info']['creator']})*"""
                 
                 assholecount = {}
-                for k in flairs.keys():
-                    if k not in config["flairs_ignore"]:
-                        assholecount[k] = 0
+                for flair in flairs.keys():
+                    if flair not in config["flairs_ignore"]:
+                        assholecount[flair] = 0
 
                 subcount += 1
                 tools.logger(tp=3, num=subcount, sub_id=submission.id)
                 sublist = open('idlist', 'r').readlines()
                 indx = -1
-                for i in sublist:
+                for sub in sublist:
                     indx += 1
-                    sublist[indx] = i.strip()
+                    sublist[indx] = sub.strip()
                 if submission.id not in sublist:
                     botcomment = submission.reply(body=ftxt + botxt + etxt)
                     tools.logger(0, sub_id=submission.id)
@@ -111,22 +109,22 @@ def runtime():
                                 and comment.author != submission.author:
                             comment_body = comment.body.split(' ')   
                             indx = -1
-                            for i in comment_body:
+                            for sub in comment_body:
                                 indx += 1
-                                i = i.split("\n")
-                                comment_body[indx] = i[0]
+                                sub = sub.split("\n")
+                                comment_body[indx] = sub[0]
                                 try:
-                                    comment_body.insert(indx + 1, i[1])
+                                    comment_body.insert(indx + 1, sub[1])
                                 except IndexError:
                                     pass
                             rate = []
-                            for i in comment_body:
-                                i = i.strip()
+                            for sub in comment_body:
+                                sub = sub.strip()
                                 replaces = ["!", "?", ".", ",", ":", "(", ")", "[", "]", "{", "}", "-",
                                             "+", "/", "\\", "'", '"', '~']
                                 for c in replaces:
-                                    i = i.replace(c, "")
-                                rate.append(i)
+                                    sub = sub.replace(c, "")
+                                rate.append(sub)
                             
                             indx = -1
                             for w in rate:
@@ -196,15 +194,14 @@ Voto | Quantidade | %
                         removes = open('rid', "r").readlines()
 
                         indx = -1
-                        for i in removes:
+                        for sub in removes:
                             indx += 1
-                            removes[indx] = i.strip()
+                            removes[indx] = sub.strip()
 
                         if submission.id not in removes and total > 1:
-                            submission.mod.remove(mod_note="Contra as regras", spam=False)
-                            submission.reply(body=f"Seu post recebeu {percent*100}% de votos '{key}' portanto foi"
-                                                f" removido por suspeita de violar as regras do subreddit. Se houve um "
-                                                "engano, por favor não hesite em mandar um modmail para a moderação.")
+                            reason = reasons["FAKE_OT"]
+                            submission.mod.remove(mod_note=f"{reason['note']}", spam=False)
+                            submission.reply(body=f"{reason['body']}")
                             tools.logger(tp=4, sub_id=submission.id, reason="VIolação")
                             open("rid", "a").write(f"{submission.id}\n")
                 elif percent < 0.5 and total > 0:
@@ -307,19 +304,9 @@ def textwall():
                         spp = 0
 
                     if paragraphs < 2 or sentences <= 2:
-                        submission.mod.remove(mod_note="Parede de texto", spam=False)
-                        submission.reply(body=
-                                        f'Sua publicação '
-                                        f'foi removida por não se encaixar nos critérios '
-                                        f'de formatação para um texto legível. \n\n'
-                                        f'Certifique que o texto esteja dividido '
-                                        f'em parágrafos e possua a pontuação correta e poste novamente.\n\n'
-                                        f'Se houve um erro, contate meu criador: '
-                                        f'[JakeWisconsin]'
-                                        f'(https://www.reddit.com/u/JakeWisconsin)\n\n'
-                                        f'spp: {spp}\n\n'
-                                        f'paragrafos: {paragraphs}\n\n'
-                                        f'frases: {sentences}')
+                        reason = reasons['TEXTWALL']
+                        submission.mod.remove(mod_note=reason['note'], spam=False)
+                        submission.reply(body=reason['body'])
                         tools.logger(tp=4, sub_id=subid, reason="Parede de texto")
 
                         open("rid", "a").write(f"{subid}\n")
