@@ -68,7 +68,8 @@ def runtime():
                 etxt = f"""
                                 
 *{joke}* 
-*{config['info']['name']} v{config['info']['version']} - by [{config['info']['creator']}](https://www.reddit.com/u/{config['info']['creator']})*"""
+*{config['info']['name']} v{config['info']['version']} - by [{config['info']['creator']}](https://www.reddit.com/u/{config['info']['creator']}).*
+*Veja meu código fonte: [Código fonte]({config['info']['github']}).*"""
                 
                 assholecount = {}
                 for flair in flairs.keys():
