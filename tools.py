@@ -1,7 +1,4 @@
 import datetime
-import os
-import platform
-
 
 def logit(msg):
     open("log", "a").write(msg + "\n")

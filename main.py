@@ -26,6 +26,7 @@ import datetime
 import traceback
 import random
 import os
+import psutil
 
 config = json.load(open('config.json', 'r'))
 api = json.load(open("api.json"))
@@ -81,14 +82,14 @@ def runtime():
             atime = datetime.datetime.now().timestamp()
 
             for submission in submissons:
-                
+
                 joke = random.choice(splashes)
                 etxt = f"""
                                 
 *{joke}* 
 *{config['info']['name']} v{config['info']['version']} - by [{config['info']['creator']}](https://www.reddit.com/u/{config['info']['creator']}).*
 *Veja meu código fonte: [Código fonte]({config['info']['github']}).*"""
-                
+
                 assholecount = {}
                 for flair in flairs.keys():
                     if flair not in config["flairs_ignore"]:
@@ -126,7 +127,7 @@ def runtime():
                     try:
                         if comment.author != settings["username"] and comment.author not in users \
                                 and comment.author != submission.author:
-                            comment_body = comment.body.split(' ')   
+                            comment_body = comment.body.split(' ')
                             indx = -1
                             for sub in comment_body:
                                 indx += 1
@@ -144,7 +145,7 @@ def runtime():
                                 for c in replaces:
                                     sub = sub.replace(c, "")
                                 rate.append(sub)
-                            
+
                             indx = -1
                             for w in rate:
                                 indx += 1
@@ -162,14 +163,14 @@ def runtime():
                             try:
                                 percent = highest / total
                             except ZeroDivisionError:
-                                percent = 1.00 
+                                percent = 1.00
 
                             '''judgment = "Não é o babaca" if key == "NEOB" else \
                                 "É o babaca" if key == "EOB" else \
                                 "Todo mundo é babaca" if key == "TEOB" else \
                                 "Ninguém é o babaca" if key == "NGM" else \
                                 "Falta informação" if key == "INFO"  "FANFIC" "Fake"'''
-                            
+
                             ind = rates.index(key)
                             judgment = judges[ind]
 
@@ -205,7 +206,7 @@ Voto | Quantidade | %
 
                 for k, v in assholecount.items():
                     votxt += f"{k} | {v} | {percents[k]}%\n"
-                
+
                 etxt = votxt + etxt
                 if percent >= 0.5 and total > 0:
                     submission.flair.select(flairs[key][0])
@@ -330,7 +331,7 @@ def textwall():
 
                         open("rid", "a").write(f"{subid}\n")
             btime = datetime.datetime.now().timestamp()
-            tools.logger(tp=2, ex=f"textwall(): {btime-atime}s", bprint=False) 
+            tools.logger(tp=2, ex=f"textwall(): {btime-atime}s", bprint=False)
         except Exception:
             tools.logger(tp=5, ex=traceback.format_exc())
 
@@ -339,10 +340,6 @@ if __name__ == '__main__':
     funcs = [runtime, backup, clearlog, textwall]
     processes = [multiprocessing.Process(target=x, args=[]) for x in funcs]
 
-    '''processes = [multiprocessing.Process(target=runtime, args=[], name="Main"),
-    multiprocessing.Process(target=backup, args=[], name="Backup"),
-    multiprocessing.Process(target=clearlog, args=[], name="Clear-Log"),
-    multiprocessing.Process(target=textwall, args=[], name="Textwall")]'''
     pids = [os.getpid()]
 
     index = -1
@@ -361,12 +358,24 @@ if __name__ == '__main__':
                 splashes = json.load(open('splashes.json', 'r'))
                 print("Valores recarregados na memória.")
             elif inp[0] == "E":
-                exit()
+                for i in processes:
+                    i.terminate()
+                    break
             elif inp[0] == "RESTART":
                 for i in processes:
                     i.terminate()
 
                 os.system(f"{config['python']} ./main.py")
                 break
-                
-                
+            elif inp[0] == "MEMORY":
+                mem = 0
+                perc = 0
+                all_processes = psutil.process_iter()
+
+                for process in all_processes:
+                    if process.pid in pids:
+                        perc += process.memory_percent()
+                        memory_info = process.memory_info()
+                        mem += memory_info.rss / 1024 / 1024
+
+                print(f"{mem:.0f} mb ({perc:.2f}%)")

@@ -6,5 +6,13 @@
   "TEXTWALL": {
     "note": "Parede de texto",
     "body": "Sua submissão foi removida por não ter parágrafos e/ou linhas suficientes. O post deverá ter no mínimo 2 parágrafos com 2 frases cada. Caso haja um erro, envie um modmail para a moderação."
+  },
+  "TOO_YOUNG": {
+    "note": "Idade menor que 13",
+    "body": "Sua submissão foi removida pois você é muito novo. Ao completar 13 anos, poste novamente!"
+  },
+  "NO_AGE": {
+    "note": "Sem identificador de idade",
+    "body": "Sua publicação foi não possui a idade no teexto. É importante por a idade no texto para fins de ajudar o julgamento. Coloque a idade e o gênero entre parênteses em alguma parte do texto assim: (13M). Substitua o número pela sua idade e a letra pelo seu gênero, sendo: M - mulher, H - homem, N - não binário.\n\n>!NOEDIT!<"
   }
 }

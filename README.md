@@ -106,6 +106,7 @@ Por agora, existem apenas 3 comandos para controlar o bot. Mais serão adicionad
 R | Recarrega os arquivos json
 E | Desliga o bot
 RESTART | Recarrega o bot
+MEMORY | Mostra o consumo de memória em megabytes
 
 # 5 - Requisitos mínimos
 
