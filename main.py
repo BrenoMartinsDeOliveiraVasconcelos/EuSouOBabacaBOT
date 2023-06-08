@@ -360,7 +360,8 @@ if __name__ == '__main__':
             elif inp[0] == "E":
                 for i in processes:
                     i.terminate()
-                    break
+
+                break
             elif inp[0] == "RESTART":
                 for i in processes:
                     i.terminate()
