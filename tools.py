@@ -56,5 +56,5 @@ def log_runtime(func, a: float, b: float):
     # O resultado da diferença entre as timestamps em milisegundos ACIMA.
 
     # colocar o tempo em minutos
-    funct_file.write(f"[{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}] Runtime: {difference_runtime/1000/60} minutos. \n")
+    funct_file.write(f"[{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}] Runtime: {(difference_runtime/60)} minutos. \n")
 
