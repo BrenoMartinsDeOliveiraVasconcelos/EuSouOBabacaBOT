@@ -28,6 +28,7 @@ Em seguida, ele carrega o arquivo de configuração `config.json`. Cada campo te
 * `flairs`: Onde fica armazenado os votos. Cada subcampo é um voto; O valor é um array de 3 items, sendo o primeiro indice o id da flair - o segundo índice o itpo de voto e, o terceiro a descrição do bot.
 * `flairs_ignore`: Tem votos que é apenas para ocasiões especiais, nesse caso deverá ser colocado esses flairs nesse array.
 * `vote_name`: O nome dos votos.
+* `text_filter`: Se define o numero minimo de frases e paragráfos, alem do tamanho máximo de caractéres por publicação
 
 Ele pega outro arquivo para quando um post  for removido. É o `reasons.json`, que tem os motivos e o texto deles. Cada motivo é um campo que tem os seguintes subcampos:
 
@@ -112,11 +113,11 @@ MEMORY | Mostra o consumo de memória em megabytes
 
 **Tipo** | **Valor**
 --|--
-RAM | 256mb
+RAM | 512mb (200mb do script + 300mb para sistema com linha de comando)
 CPU | 2 núcelos ou superior
 Python | 3.9+
-Bibliotecas Python | praw, prawcore
+Bibliotecas Python | praw, prawcore, psutil
 Internet | Sim
-SO | Qualquer sistema moderno 
+Sistema operacional | Qualquer sistema compatível com Python 3.9 e com acesso a internet 
 
 Para executar, basta criar o arquivo conforme o primeiro tópico e rodar o arquivo `main.py`.
