@@ -6,11 +6,11 @@
         "creator": "JakeWisconsin",
         "github": "https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT"
     },
-    "upper_text": "Feliz mês do orgulho LGBT! <3",
+    "upper_text": "*\n\n# Quer uma versão mais madura do sub? Entre no r/eusouobabacabutadult \n\n**Feliz mês do orgulho LGBT! <3",
     "submissions": "900",
     "subreddit": "EuSouOBabaca",
     "backup": "/srv/Backup",
-    "clear_log": 86400,
+    "clear_log": 3600,
     "flairs": {
         "NEOB": ["fad0940c-6841-11ed-baed-365116e43406", 0, "Não é o babaca (e o resto sim)"],
         "EOB": ["e46b8208-6841-11ed-99cd-cec761e4d61c", 0, "É o babaca"],
@@ -20,12 +20,16 @@
         "TEOB": ["8cb95bb0-6842-11ed-9cdf-a2c7df914eb2", 0, "Todo mundo é o babaca"],
         "FANFIC": ["5c55d140-700a-11ed-8d83-1e3195d8e0d4", 1, "Sinalizar o post como falso"],
         "OT": ["3933d8ec-f68d-11ed-92df-7a25a96a3944", 1, "Sinalizar como fora do tópico"],
-        "META": ["67ebaf8e-f68d-11ed-bd52-c293bbbbaa0c", 1, "Publicação META"],
         "INCONCLUSIVE": ["17ace5be-6cd2-11ed-880b-f6403a5de3db", 2, ""],
         "NOT_AVALIABLE": ["528e0f44-7017-11ed-bf35-7a08e652fb3d", 2, ""],
         "NOT_CLASSIFIED": ["5462ec04-70c6-11ed-8642-aa07fd483ac4", 2, ""]
     },
     "flairs_ignore": ["INCONCLUSIVE", "NOT_AVALIABLE", "NOT_CLASSIFIED"],
     "vote_name": ["Não é o babaca", "É o babaca", "É o trouxa", "Não há babacas", "Falta informação", "Todos são babacas", "Falso", 
-    "Off-topic", "Publicação META"]
+    "Off-topic", "Publicação META"],
+    "text_filter": {
+        "min_paragraphs": 2,
+        "min_sentences": 3,
+        "max_body": 9000
+    }
 }

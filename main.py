@@ -28,6 +28,8 @@ import random
 import os
 import psutil
 
+
+
 config = json.load(open('config.json', 'r'))
 api = json.load(open("api.json"))
 splashes = json.load(open('splashes.json', 'r'))
@@ -96,12 +98,17 @@ def runtime():
                         assholecount[flair] = 0
 
                 subcount += 1
-                tools.logger(tp=3, num=subcount, sub_id=submission.id)
                 sublist = open('idlist', 'r').readlines()
                 indx = -1
                 for sub in sublist:
                     indx += 1
                     sublist[indx] = sub.strip()
+                indx = -1
+                # abrir a lista de corpos já salvos ou não
+                bodylist = open('./bodies/blist', 'r').readlines()
+                for line in bodylist:
+                    indx += 1
+                    bodylist[indx] = line.strip()
                 if submission.id not in sublist:
                     botcomment = submission.reply(body=ftxt + botxt + etxt)
                     tools.logger(0, sub_id=submission.id)
@@ -230,27 +237,48 @@ Voto | Quantidade | %
                     submission.flair.select(flairs["NOT_AVALIABLE"][0])
                 flairchanges += f"\n* Flair de https://www.reddit.com/{submission.id} é '{judgment}'"
                 tools.logger(2, ex=f"Flair editada em {submission.id}")
+                
+                notInBody = False
+                if submission.id not in bodylist:
+                    notInBody = True
+                    open(f"./bodies/{submission.id}", "w+").write(submission.selftext)
+                    open('./bodies/blist', "a").write(f"{submission.id}\n")
+
+                body_obj = open(f"./bodies/{submission.id}", "r").readlines()
+                index = 0
+                for line in body_obj:
+                    body_obj[index] = ">" + line
+                    index += 1
+
+                body_obj = ''.join(body_obj)
+                bodytxt = f"\n\n# Texto original\n\n{body_obj}\n\n>!NOEDIT!<"
+
+                
                 for com in comments:
                     if com.author == f"{settings['username']}":
                         bd = com.body.split("\n")
                         if subcount >= int(settings["submissions"]):
                             ftxt += "# Essa publicação será mais atualizada!\n\n"
+                        fullbody = ftxt + botxt + etxt
+                        if notInBody:
+                            com.reply(bodytxt)
                         if ">!NOEDIT!<" not in bd:
                             com.edit(
-                                body=ftxt + botxt + etxt)
+                                body=fullbody)
                             tools.logger(1, sub_id=submission.id)
                             edits += f"\n* Comentário do bot editado em https://www.reddit.com/{submission.id}\n"
                 ftxt = f"# Veredito atual:" \
                        f" Não disponível \n\nÚltima atualização feita em: " \
                        f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
             btime = datetime.datetime.now().timestamp()
-            tools.logger(2, ex=f"runtime(): {btime-atime}s", bprint=False)
+            tools.log_runtime(runtime, atime, btime)
         except Exception as e:
             tools.logger(5, ex=traceback.format_exc())
 
 
 def backup():
     while True:
+        atime = datetime.datetime.now().timestamp()
         try:
             folder = f"{settings['backup']}/{datetime.datetime.now().strftime('%Y-%m-%d/%H-%M-%S')}"
             src = "."
@@ -259,12 +287,18 @@ def backup():
         except:
             pass
         time.sleep(3600)
+        btime = datetime.datetime.now().timestamp()
+        tools.log_runtime(backup, atime, btime)
+        
 
 
 def clearlog():
     while True:
+        atime = datetime.datetime.now().timestamp()
         time.sleep(config["clear_log"])
         open("log", "w+").write("")
+        btime = datetime.datetime.now().timestamp()
+        tools.log_runtime(clearlog, atime, btime)
 
 
 def textwall():
@@ -279,8 +313,6 @@ def textwall():
                 subcount += 1
                 subid = submission.id
 
-                tools.logger(tp=3, num=subcount, sub_id=subid)
-
                 sublist = open('rid', 'r').readlines()
                 indx = -1
                 for i in sublist:
@@ -293,7 +325,7 @@ def textwall():
                     except:
                         body = ""
                     paragraphs = 1
-                    sentences = 0
+                    sentences = 1
 
                     # Detyerminar quantos parágrafos tem o texto
                     index = -1
@@ -310,7 +342,7 @@ def textwall():
                                 pass
 
                             # Quantas frases tem
-                            if i == "." and not paragraph_cond:
+                            if i in [".", "?", "!"] and not paragraph_cond:
                                 sentences += 1
 
                             paragraph_cond = False
@@ -323,7 +355,7 @@ def textwall():
                     else:
                         spp = 0
 
-                    if paragraphs < 2 or sentences <= 2:
+                    if paragraphs < config["text_filter"]["min_paragraphs"] or sentences < config["text_filter"]["min_sentences"]  or len(body) > config["text_filter"]["max_body"] :
                         reason = reasons['TEXTWALL']
                         submission.mod.remove(mod_note=reason['note'], spam=False)
                         submission.reply(body=reason['body'])
@@ -331,14 +363,14 @@ def textwall():
 
                         open("rid", "a").write(f"{subid}\n")
             btime = datetime.datetime.now().timestamp()
-            tools.logger(tp=2, ex=f"textwall(): {btime-atime}s", bprint=False)
+            tools.log_runtime(textwall, atime, btime)
         except Exception:
             tools.logger(tp=5, ex=traceback.format_exc())
 
 
 if __name__ == '__main__':
     funcs = [runtime, backup, clearlog, textwall]
-    processes = [multiprocessing.Process(target=x, args=[]) for x in funcs]
+    processes = [multiprocessing.Process(target=x, args=[], name=x.__name__) for x in funcs]
 
     pids = [os.getpid()]
 
@@ -347,7 +379,7 @@ if __name__ == '__main__':
         index += 1
         i.start()
         pids.append(i.pid)
-        print(f"Iniciado processo com o PID {i.pid} (função {funcs[index].__name__}())")
+        print(f"Iniciado processo com o PID {i.pid} para a função {funcs[index].__name__}()")
 
     while True:
         inp = input("=> ").upper().split(" ")

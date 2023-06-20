@@ -1,3 +1,21 @@
+'''
+This file has some functions used by the main process
+Copyright (C) 2023  Breno Martins
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import datetime
 
 def logit(msg):
@@ -25,3 +43,18 @@ def logger(tp, sub_id="", ex="", num="", reason="", bprint=False):
         msg = f"{sub_id} foi removido. MOTIVO: {reason}"
 
     logit(f"[{current_time}] "+msg)
+
+
+def log_runtime(func, a: float, b: float):
+    # Abrir o arquivo da função para armazenar o tempo de runtime
+    try:
+        funct_file = open(f"./runtime_info/{func.__name__}", "a")
+    except FileNotFoundError:
+        funct_file = open(f"./runtime_info/{func.__name__}", "w+")
+
+    difference_runtime = b - a
+    # O resultado da diferença entre as timestamps em milisegundos ACIMA.
+
+    # colocar o tempo em minutos
+    funct_file.write(f"[{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}] Runtime: {difference_runtime/1000/60} minutos. \n")
+
