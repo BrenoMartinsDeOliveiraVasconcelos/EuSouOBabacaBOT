@@ -28,6 +28,8 @@ import random
 import os
 import psutil
 
+import preparation as prep
+
 
 
 config = json.load(open('config.json', 'r'))
@@ -130,146 +132,163 @@ def runtime():
                 percent = 0
                 rates = [x for x in assholecount.keys()]
                 judges = config["vote_name"]
+                num_coms = 0
                 for comment in comments:
-                    try:
-                        if comment.author != settings["username"] and comment.author not in users \
-                                and comment.author != submission.author:
-                            comment_body = comment.body.split(' ')
-                            indx = -1
-                            for sub in comment_body:
-                                indx += 1
-                                sub = sub.split("\n")
-                                comment_body[indx] = sub[0]
+                    num_coms += 1
+
+                numbers = json.load(open("./data/number_comments.json", "r"))
+                try:
+                    saved = numbers[f"{submission.id}"]
+                    ignore_saved = False
+                except KeyError:
+                    saved = numbers[f"{submission.id}"] = num_coms
+                    ignore_saved = True
+
+                if ignore_saved or saved < num_coms or saved > num_coms:
+                    for comment in comments:
+                        try:
+                            if comment.author != settings["username"] and comment.author not in users \
+                                    and comment.author != submission.author:
+                                comment_body = comment.body.split(' ')
+                                indx = -1
+                                for sub in comment_body:
+                                    indx += 1
+                                    sub = sub.split("\n")
+                                    comment_body[indx] = sub[0]
+                                    try:
+                                        comment_body.insert(indx + 1, sub[1])
+                                    except IndexError:
+                                        pass
+                                rate = []
+                                for sub in comment_body:
+                                    sub = sub.strip()
+                                    replaces = ["!", "?", ".", ",", ":", "(", ")", "[", "]", "{", "}", "-",
+                                                "+", "/", "\\", "'", '"', '~']
+                                    for c in replaces:
+                                        sub = sub.replace(c, "")
+                                    rate.append(sub)
+
+                                indx = -1
+                                for w in rate:
+                                    indx += 1
+                                    rate[indx] = w.upper().strip()
+                                for r in rates:
+                                    if r in rate:
+                                        assholecount[r] += 1
+                                        break
+                                total = 0
+                                for k, v in assholecount.items():
+                                    total += v
+                                    if v >= highest:
+                                        highest = v
+                                        key = k
                                 try:
-                                    comment_body.insert(indx + 1, sub[1])
-                                except IndexError:
-                                    pass
-                            rate = []
-                            for sub in comment_body:
-                                sub = sub.strip()
-                                replaces = ["!", "?", ".", ",", ":", "(", ")", "[", "]", "{", "}", "-",
-                                            "+", "/", "\\", "'", '"', '~']
-                                for c in replaces:
-                                    sub = sub.replace(c, "")
-                                rate.append(sub)
+                                    percent = highest / total
+                                except ZeroDivisionError:
+                                    percent = 1.00
 
-                            indx = -1
-                            for w in rate:
-                                indx += 1
-                                rate[indx] = w.upper().strip()
-                            for r in rates:
-                                if r in rate:
-                                    assholecount[r] += 1
-                                    break
-                            total = 0
-                            for k, v in assholecount.items():
-                                total += v
-                                if v >= highest:
-                                    highest = v
-                                    key = k
-                            try:
-                                percent = highest / total
-                            except ZeroDivisionError:
-                                percent = 1.00
+                                '''judgment = "Não é o babaca" if key == "NEOB" else \
+                                    "É o babaca" if key == "EOB" else \
+                                    "Todo mundo é babaca" if key == "TEOB" else \
+                                    "Ninguém é o babaca" if key == "NGM" else \
+                                    "Falta informação" if key == "INFO"  "FANFIC" "Fake"'''
 
-                            '''judgment = "Não é o babaca" if key == "NEOB" else \
-                                "É o babaca" if key == "EOB" else \
-                                "Todo mundo é babaca" if key == "TEOB" else \
-                                "Ninguém é o babaca" if key == "NGM" else \
-                                "Falta informação" if key == "INFO"  "FANFIC" "Fake"'''
+                                ind = rates.index(key)
+                                judgment = judges[ind]
 
-                            ind = rates.index(key)
-                            judgment = judges[ind]
+                                if percent < 0.50:
+                                    judgment = "Inconclusivo"
+                                    votetxt = f"{total} votos contados ao total"
+                                else:
+                                    votetxt = f"{percent * 100:.2f}% de {total} votos"
 
-                            if percent < 0.50:
-                                judgment = "Inconclusivo"
-                                votetxt = f"{total} votos contados ao total"
-                            else:
-                                votetxt = f"{percent * 100:.2f}% de {total} votos"
+                                if total == 0:
+                                    judgment = "Não avaliado"
+                                    votetxt = f"{total} votos contados ao total"
+                                ftxt = f"# Veredito atual: " \
+                                       f"{judgment} ({votetxt})\n\nÚltima atualização feita em: " \
+                                       f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
+                                users.append(comment.author)
+                        except Exception:
+                            tools.logger(5, ex=traceback.format_exc())
+                    numbers[f"{submission.id}"] = num_coms
+                    percents = {}
+                    for k, v in assholecount.items():
+                        try:
+                            percents[k] = f"{(int(v) / total) * 100:.2f}"
+                        except ZeroDivisionError:
+                            percents[k] = f"0.00"
+                    tools.logger(2, ex="Submissão analizada!")
 
-                            if total == 0:
-                                judgment = "Não avaliado"
-                                votetxt = f"{total} votos contados ao total"
-                            ftxt = f"# Veredito atual: " \
-                                   f"{judgment} ({votetxt})\n\nÚltima atualização feita em: " \
-                                   f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
-                            users.append(comment.author)
-                    except Exception:
-                        tools.logger(5, ex=traceback.format_exc())
-
-                percents = {}
-                for k, v in assholecount.items():
-                    try:
-                        percents[k] = f"{(int(v) / total) * 100:.2f}"
-                    except ZeroDivisionError:
-                        percents[k] = f"0.00"
-                tools.logger(2, ex="Submissão analizada!")
-
-                votxt = f"""
+                    votxt = f"""
 # Tabela de votos
 Voto | Quantidade | %
 :--:|:--:|:--:
 """
 
-                for k, v in assholecount.items():
-                    votxt += f"{k} | {v} | {percents[k]}%\n"
+                    for k, v in assholecount.items():
+                        votxt += f"{k} | {v} | {percents[k]}%\n"
 
-                etxt = votxt + etxt
-                if percent >= 0.5 and total > 0:
-                    submission.flair.select(flairs[key][0])
-                    if key in ["FANFIC", "OT"]:
-                        removes = open('rid', "r").readlines()
+                    etxt = votxt + etxt
+                    if percent >= 0.5 and total > 0:
+                        submission.flair.select(flairs[key][0])
+                        if key in ["FANFIC", "OT"]:
+                            removes = open('rid', "r").readlines()
 
-                        indx = -1
-                        for sub in removes:
-                            indx += 1
-                            removes[indx] = sub.strip()
+                            indx = -1
+                            for sub in removes:
+                                indx += 1
+                                removes[indx] = sub.strip()
 
-                        if submission.id not in removes and total > 1:
-                            reason = reasons["FAKE_OT"]
-                            submission.mod.remove(mod_note=f"{reason['note']}", spam=False)
-                            submission.reply(body=f"{reason['body']}")
-                            tools.logger(tp=4, sub_id=submission.id, reason="VIolação")
-                            open("rid", "a").write(f"{submission.id}\n")
-                elif percent < 0.5 and total > 0:
-                    submission.flair.select(flairs["INCONCLUSIVE"][0])
-                elif total == 0:
-                    submission.flair.select(flairs["NOT_AVALIABLE"][0])
-                flairchanges += f"\n* Flair de https://www.reddit.com/{submission.id} é '{judgment}'"
-                tools.logger(2, ex=f"Flair editada em {submission.id}")
-                
-                notInBody = False
-                if submission.id not in bodylist:
-                    notInBody = True
-                    open(f"./bodies/{submission.id}", "w+").write(submission.selftext)
-                    open('./bodies/blist', "a").write(f"{submission.id}\n")
+                            if submission.id not in removes and total > 1:
+                                reason = reasons["FAKE_OT"]
+                                submission.mod.remove(mod_note=f"{reason['note']}", spam=False)
+                                submission.reply(body=f"{reason['body']}")
+                                tools.logger(tp=4, sub_id=submission.id, reason="VIolação")
+                                open("rid", "a").write(f"{submission.id}\n")
+                    elif percent < 0.5 and total > 0:
+                        submission.flair.select(flairs["INCONCLUSIVE"][0])
+                    elif total == 0:
+                        submission.flair.select(flairs["NOT_AVALIABLE"][0])
+                    flairchanges += f"\n* Flair de https://www.reddit.com/{submission.id} é '{judgment}'"
+                    tools.logger(2, ex=f"Flair editada em {submission.id}")
 
-                body_obj = open(f"./bodies/{submission.id}", "r").readlines()
-                index = 0
-                for line in body_obj:
-                    body_obj[index] = ">" + line
-                    index += 1
+                    notInBody = False
+                    if submission.id not in bodylist:
+                        notInBody = True
+                        open(f"./bodies/{submission.id}", "w+").write(submission.selftext)
+                        open('./bodies/blist', "a").write(f"{submission.id}\n")
 
-                body_obj = ''.join(body_obj)
-                bodytxt = f"\n\n# Texto original\n\n{body_obj}\n\n>!NOEDIT!<"
+                    body_obj = open(f"./bodies/{submission.id}", "r").readlines()
+                    index = 0
+                    for line in body_obj:
+                        body_obj[index] = ">" + line
+                        index += 1
 
-                
-                for com in comments:
-                    if com.author == f"{settings['username']}":
-                        bd = com.body.split("\n")
-                        if subcount >= int(settings["submissions"]):
-                            ftxt += "# Essa publicação será mais atualizada!\n\n"
-                        fullbody = ftxt + botxt + etxt
-                        if notInBody:
-                            com.reply(bodytxt)
-                        if ">!NOEDIT!<" not in bd:
-                            com.edit(
-                                body=fullbody)
-                            tools.logger(1, sub_id=submission.id)
-                            edits += f"\n* Comentário do bot editado em https://www.reddit.com/{submission.id}\n"
-                ftxt = f"# Veredito atual:" \
-                       f" Não disponível \n\nÚltima atualização feita em: " \
-                       f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
+                    body_obj = ''.join(body_obj)
+                    bodytxt = f"\n\n# Texto original\n\n{body_obj}\n\n>!NOEDIT!<"
+
+                    for com in comments:
+                        if com.author == f"{settings['username']}":
+                            bd = com.body.split("\n")
+                            if subcount >= int(settings["submissions"]):
+                                ftxt += "# Essa publicação será mais atualizada!\n\n"
+                            fullbody = ftxt + botxt + etxt
+                            if notInBody:
+                                com.reply(bodytxt)
+                            if ">!NOEDIT!<" not in bd:
+                                com.edit(
+                                    body=fullbody)
+                                tools.logger(1, sub_id=submission.id)
+                                edits += f"\n* Comentário do bot editado em https://www.reddit.com/{submission.id}\n"
+                    ftxt = f"# Veredito atual:" \
+                           f" Não disponível \n\nÚltima atualização feita em: " \
+                           f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
+
+                numstring = json.dumps(numbers, indent=4)
+
+                open("./data/number_comments.json", "w+").write(numstring)
+
             btime = datetime.datetime.now().timestamp()
             tools.log_runtime(runtime, atime, btime)
         except Exception as e:
@@ -369,6 +388,9 @@ def textwall():
 
 
 if __name__ == '__main__':
+    # Preparar os arquivos
+    prep.begin()
+
     funcs = [runtime, backup, clearlog, textwall]
     processes = [multiprocessing.Process(target=x, args=[], name=x.__name__) for x in funcs]
 
