@@ -38,11 +38,15 @@ def begin():
 
     #./bodies
     if os.path.exists("./bodies"):
-        if not os.path.exists("./bodies/blist"):
-            open("./bodies/blist", "w+")
+        if not os.path.exists("./bodies/bdlist"):
+            open("./bodies/bdlist", "w+")
+
+        if not os.path.exists("./bodies/bodies.json"):
+            open("./bodies/bodies.json", "w+").write("{}")
     else:
         os.mkdir("./bodies")
-        open("./bodies/blist", "w+")
+        open("./bodies/bdlist", "w+")
+        open("./bodies/bodies.json", "w+").write("{}")
 
     # arquivo de log e id
     emptytxts = ["idlist", "log", "rid"]
