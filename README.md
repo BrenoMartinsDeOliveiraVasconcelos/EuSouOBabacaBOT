@@ -113,9 +113,9 @@ MEMORY | Mostra o consumo de memória em megabytes
 
 **Tipo** | **Valor**
 --|--
-RAM | 512mb (200mb do script + 300mb para sistema com linha de comando)
-CPU | 2 núcelos ou superior
-Python | 3.9+
+RAM | 256 mb
+CPU | 1 núcelo ou superior
+Python | 3.7+
 Bibliotecas Python | praw, prawcore, psutil
 Internet | Sim
 Sistema operacional | Qualquer sistema compatível com Python 3.9 e com acesso a internet 
