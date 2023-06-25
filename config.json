@@ -1,12 +1,12 @@
 {
-    "python": "python3",
+    "python": "python3.11",
     "info": {
         "name": "Lucas Bot",
         "version": "3",
         "creator": "JakeWisconsin",
         "github": "https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT"
     },
-    "upper_text": "*\n\n# Quer uma versão mais madura do sub? Entre no r/eusouobabacabutadult \n\n**Feliz mês do orgulho LGBT! <3",
+    "upper_text": "Feliz mês do orgulho LGBT! <3",
     "submissions": "900",
     "subreddit": "EuSouOBabaca",
     "backup": "/srv/Backup",

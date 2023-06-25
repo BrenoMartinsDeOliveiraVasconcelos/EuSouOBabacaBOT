@@ -31,47 +31,35 @@ import psutil
 import preparation as prep
 
 
+start = datetime.datetime.now().timestamp()
 
 config = json.load(open('config.json', 'r'))
-api = json.load(open("api.json"))
+api = json.load(open("api.json", "r"))
 splashes = json.load(open('splashes.json', 'r'))
 reasons = json.load(open("reasons.json", "r"))
 
-settings = {
-    "clientid": api["clientid"],
-    "clientsecret": api["clientsecret"],
-    "username": api["rusername"],
-    "password": api["password"],
-    "useragent": api["useragent"],
-    "submissions": config['submissions'],
-    "subreddit": config["subreddit"],
-    "backup": config["backup"],
-    "clear_log": config["clear_log"]
-}
-
-flairs = config["flairs"]
-
 reddit = praw.Reddit(
-    user_agent=settings["useragent"],
-    client_id=settings["clientid"],
-    client_secret=settings["clientsecret"],
-    username=settings["username"],
-    password=settings["password"]
+    user_agent=api["useragent"],
+    client_id=api["clientid"],
+    client_secret=api["clientsecret"],
+    username=api["username"],
+    password=api["password"]
 )
 
 # Post a comment to every new reddit submission in r/EuSOuOBabaca
-botxt = f"\n\n**{config['upper_text']}**\n\nVou contar as respostas que as pessoas dão nesse post! Pra ser contado, " \
-        f"responda com essas siglas o post:\n\n"
-
-votxt = ["", "", ""]
-for k, v in flairs.items():
-    votxt[v[1]] += f"{k} - {v[2]}\n\n"
-
-botxt += votxt[0] + "**Votos especiais**\n\n" + votxt[1] + "\n\n"
-botxt += "##Nota: Pode demorar cerca de 2 horas para atualizar!\n\n"
 
 
 def runtime():
+    botxt = f"\n\n# {config['upper_text']}\n\nVou contar as respostas que as pessoas dão nesse post! Pra ser contado, " \
+            f"responda com essas siglas o post:\n\n"
+
+    votxt = ["", "", ""]
+    for k, v in config["flairs"].items():
+        votxt[v[1]] += f"{k} - {v[2]}\n\n"
+
+    botxt += votxt[0] + "**Votos especiais**\n\n" + votxt[1] + "\n\n"
+    botxt += "##Nota: Pode demorar cerca de 2 horas para atualizar!\n\n"
+
     reddit.validate_on_submit = True
     while True:
         try:
@@ -79,7 +67,7 @@ def runtime():
                    f" Não processado ainda \n\nÚltima atualização feita em: " \
                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
             subcount = 0
-            submissons = reddit.subreddit(settings["subreddit"]).new(limit=int(settings["submissions"]))
+            submissons = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
             adds = ""
             edits = ""
             flairchanges = ""
@@ -95,7 +83,7 @@ def runtime():
 *Veja meu código fonte: [Código fonte]({config['info']['github']}).*"""
 
                 assholecount = {}
-                for flair in flairs.keys():
+                for flair in config["flairs"].keys():
                     if flair not in config["flairs_ignore"]:
                         assholecount[flair] = 0
 
@@ -128,7 +116,7 @@ def runtime():
                     botcomment.mod.distinguish(sticky=True)
                     botcomment.mod.approve()
                     sublist.append(submission.id)
-                    submission.flair.select(flairs["NOT_CLASSIFIED"][0])
+                    submission.flair.select(config["flairs"]["NOT_CLASSIFIED"][0])
                     with open('idlist', 'a') as f:
                         f.write(submission.id + '\n')
                     adds += f"\n* Adicionado https://www.reddit.com/{submission.id} a lista de ids.\n"
@@ -158,7 +146,7 @@ def runtime():
 # Temporariamente tirando otimização
                 for comment in comments:
                     try:
-                        if comment.author != settings["username"] and comment.author not in users \
+                        if comment.author != api["username"] and comment.author not in users \
                                 and comment.author != submission.author:
                             comment_body = comment.body.split(' ')
                             indx = -1
@@ -242,7 +230,7 @@ Voto | Quantidade | %
 
                 etxt = votxt + etxt
                 if percent >= 0.5 and total > 0:
-                    submission.flair.select(flairs[key][0])
+                    submission.flair.select(config["flairs"][key][0])
                     if key in ["FANFIC", "OT"]:
                         removes = open('rid', "r").readlines()
 
@@ -258,9 +246,9 @@ Voto | Quantidade | %
                             tools.logger(tp=4, sub_id=submission.id, reason="VIolação")
                             open("rid", "a").write(f"{submission.id}\n")
                 elif percent < 0.5 and total > 0:
-                    submission.flair.select(flairs["INCONCLUSIVE"][0])
+                    submission.flair.select(config["flairs"]["INCONCLUSIVE"][0])
                 elif total == 0:
-                    submission.flair.select(flairs["NOT_AVALIABLE"][0])
+                    submission.flair.select(config["flairs"]["NOT_AVALIABLE"][0])
                 flairchanges += f"\n* Flair de https://www.reddit.com/{submission.id} é '{judgment}'"
                 tools.logger(2, ex=f"Flair editada em {submission.id}")
 
@@ -279,13 +267,13 @@ Voto | Quantidade | %
                 bodytxt = f"\n\n# Texto original\n\n{body_obj}\n\n>!NOEDIT!<"
 
                 for com in comments:
-                    if com.author == f"{settings['username']}":
+                    if com.author == f"{api['username']}":
                         bd = com.body.split("\n")
-                        if subcount >= int(settings["submissions"]):
+                        if subcount >= int(config["submissions"]):
                             ftxt += "# Essa publicação será mais atualizada!\n\n"
                         fullbody = ftxt + botxt + etxt
                         if notInBody:
-                            com.reply(bodytxt)
+                            com.reply(body=bodytxt)
                         if ">!NOEDIT!<" not in bd:
                             com.edit(
                                 body=fullbody)
@@ -309,7 +297,7 @@ def backup():
     while True:
         atime = datetime.datetime.now().timestamp()
         try:
-            folder = f"{settings['backup']}/{datetime.datetime.now().strftime('%Y-%m-%d/%H-%M-%S')}"
+            folder = f"{config['backup']}/{datetime.datetime.now().strftime('%Y-%m-%d/%H-%M-%S')}"
             src = "."
             shutil.copytree(src, folder, ignore=shutil.ignore_patterns("venv", ".", "__"))
             tools.logger(2, bprint=False, ex="Backup realizado")
@@ -336,7 +324,7 @@ def textwall():
         atime = datetime.datetime.now().timestamp()
         try:
             subcount = 0
-            submissons = reddit.subreddit(settings["subreddit"]).new(limit=int(settings["submissions"]))
+            submissons = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
             for submission in submissons:
                 time.sleep(1)
                 subcount += 1
@@ -413,6 +401,8 @@ if __name__ == '__main__':
         pids.append(i.pid)
         print(f"Iniciado processo com o PID {i.pid} para a função {funcs[index].__name__}()")
 
+    end = datetime.datetime.now().timestamp()
+    print(f"main: {(end-start)*1000:.0f} ms.")
     while True:
         inp = input("=> ").upper().split(" ")
         if len(inp) >= 1:
@@ -444,4 +434,3 @@ if __name__ == '__main__':
                         mem += memory_info.rss / 1024 / 1024
 
                 print(f"{mem:.0f} mb ({perc:.2f}%)")
-
