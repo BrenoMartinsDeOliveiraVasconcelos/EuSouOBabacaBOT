@@ -6,7 +6,7 @@
         "creator": "JakeWisconsin",
         "github": "https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT"
     },
-    "upper_text": "Feliz mês do orgulho LGBT! <3",
+    "upper_text": "Entre no r/EuSouOBabacaButAdult para temas mais maduros!",
     "submissions": "900",
     "subreddit": "EuSouOBabaca",
     "backup": "/srv/Backup",
@@ -31,5 +31,9 @@
         "min_paragraphs": 2,
         "min_sentences": 3,
         "max_body": 9000
+    },
+    "karma_filter": {
+        "enabled": true,
+        "min": 10
     }
 }

@@ -64,7 +64,7 @@ def runtime():
     while True:
         try:
             ftxt = f"# Veredito atual:" \
-                   f" Não processado ainda \n\nÚltima atualização feita em: " \
+                   f" Não processado ainda \n\nÚltima análise feita em: " \
                    f"{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M')}\n\n "
             subcount = 0
             submissons = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
@@ -385,11 +385,43 @@ def textwall():
             tools.logger(tp=5, ex=traceback.format_exc())
 
 
+def verify_user():
+    reddit.validate_on_submit = True
+    while config["karma_filter"]["enabled"]:
+        sublist = open('rid', 'r').readlines()
+        indx = -1
+        for i in sublist:
+            indx += 1
+            sublist[indx] = i.strip()
+
+        atime = datetime.datetime.now().timestamp()
+        try:
+            subcount = 0
+            submissons = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
+            for submission in submissons:
+                time.sleep(1)
+                subcount += 1
+                subid = submission.id
+
+                if subid not in sublist:
+                    # filtra os users por comment_karma
+                    if submission.author.comment_karma < config["karma_filter"]["min"]:
+                        reason = reasons["KARMA"]
+                        submission.mod.remove(mod_note=reason["note"], spam=False)
+                        submission.reply(body=reason["body"])
+                        tools.logger(tp=4, sub_id=subid, reason="Karma")
+
+                        open("rid", "a").write(f"{subid}\n")
+
+        except Exception:
+            tools.logger(tp=5, ex=traceback.format_exc())
+
+
 if __name__ == '__main__':
     # Preparar os arquivos
     prep.begin()
 
-    funcs = [runtime, backup, clearlog, textwall]
+    funcs = [runtime, backup, clearlog, textwall, verify_user]
     processes = [multiprocessing.Process(target=x, args=[], name=x.__name__) for x in funcs]
 
     pids = [os.getpid()]

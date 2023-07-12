@@ -14,5 +14,9 @@
   "NO_AGE": {
     "note": "Sem identificador de idade",
     "body": "Sua publicação foi não possui a idade no teexto. É importante por a idade no texto para fins de ajudar o julgamento. Coloque a idade e o gênero entre parênteses em alguma parte do texto assim: (13M). Substitua o número pela sua idade e a letra pelo seu gênero, sendo: M - mulher, H - homem, N - não binário.\n\n>!NOEDIT!<"
+  },
+  "KARMA": {
+    "note": "Pouco karma",
+    "body": "Sua publicação foi removida pois você possui pouco karma."
   }
 }
