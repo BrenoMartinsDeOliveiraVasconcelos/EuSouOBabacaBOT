@@ -88,14 +88,10 @@ def runtime():
                         assholecount[flair] = 0
 
                 subcount += 1
-                sublist = open('idlist', 'r').readlines()
-                indx = -1
-                for sub in sublist:
-                    indx += 1
-                    sublist[indx] = sub.strip()
+                sublist = tools.getfiletext(open("idlist", "r"))
 
                 indx = -1
-                bdlist = open("./bodies/bdlist", "r").readlines()
+                bdlist = open("bodies/bdlist", "r").readlines()
                 for sub in bdlist:
                     indx += 1
                     bdlist[indx] = sub.strip()
@@ -330,7 +326,7 @@ def textwall():
                 subcount += 1
                 subid = submission.id
 
-                sublist = open('rid', 'r').readlines()
+                sublist = tools.getfiletext(open("rid", "r"))
                 indx = -1
                 for i in sublist:
                     indx += 1
@@ -388,7 +384,9 @@ def textwall():
 def verify_user():
     reddit.validate_on_submit = True
     while config["karma_filter"]["enabled"]:
-        sublist = open('rid', 'r').readlines()
+        # espera por x segundos para executar o filtro
+        time.sleep(config["karma_filter"]["wait"])
+        sublist = tools.getfiletext(open("rid", "r"))
         indx = -1
         for i in sublist:
             indx += 1
@@ -405,23 +403,97 @@ def verify_user():
 
                 if subid not in sublist:
                     # filtra os users por comment_karma
-                    if submission.author.comment_karma < config["karma_filter"]["min"]:
+                    redditor = reddit.redditor(submission.author)
+                    try:
+                        karma = redditor.comment_karma + redditor.link_karma
+                    except AttributeError:
+                        karma = config["karma_filter"]["min"]
+
+                    if karma < config["karma_filter"]["min"]:
                         reason = reasons["KARMA"]
                         submission.mod.remove(mod_note=reason["note"], spam=False)
                         submission.reply(body=reason["body"])
                         tools.logger(tp=4, sub_id=subid, reason="Karma")
 
                         open("rid", "a").write(f"{subid}\n")
-
+            btime = datetime.datetime.now().timestamp()
+            tools.log_runtime(verify_user, atime, btime)
         except Exception:
             tools.logger(tp=5, ex=traceback.format_exc())
+
+
+def agechecker():
+    '''
+    Checa se tem idade no post
+
+    :return: None
+    '''
+
+    sublist = tools.getfiletext(open("aid", "r"))
+    rid = tools.getfiletext(open("rid", "r"))
+    submissions = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
+
+    try:
+        while True:
+            a = datetime.datetime.now().timestamp()
+            time.sleep(10)
+            for submission in submissions:
+                if submission.id not in sublist:
+                    open("aid", "a").write(f"{submission.id}\n")
+                    title_body = []
+                    for i in submission.title.split(" "):
+                        title_body.append(i)
+
+                    for i in submission.selftext.split(" "):
+                        title_body.append(i)
+
+                    index = 0
+                    for i in title_body:
+                        title_body[index] = i.replace("\n\n", "")
+                        index += 1
+
+                    index = 0
+                    status = True
+                    for word in title_body:
+                        # checar se tem numero na palavra, se tiver quebra tudo
+                        letters = []
+
+                        for l in word:
+                            letters.append(l)
+
+                        place = 0
+                        status = False
+                        for x in letters:
+                            x: str
+                            if x.isnumeric():
+                                status = True
+
+                            place += 1
+
+                        if status:
+                            break
+
+                        index += 1
+
+                    if submission.id not in rid and not status:
+                        reason = reasons["NO_AGE"]
+                        submission.mod.remove(mod_note=reason["note"], spam=False)
+                        submission.reply(body=reason["body"])
+                        tools.logger(tp=4, sub_id=submission.id, reason="Sem idade")
+
+                        open("rid", "a").write(f"{submission.id}\n")
+
+            b = datetime.datetime.now().timestamp()
+            tools.log_runtime(agechecker, a, b)
+    except Exception:
+        tools.logger(tp=5, ex=traceback.format_exc())
 
 
 if __name__ == '__main__':
     # Preparar os arquivos
     prep.begin()
 
-    funcs = [runtime, backup, clearlog, textwall, verify_user]
+    funcs = [runtime, backup, clearlog, textwall, verify_user, agechecker]
     processes = [multiprocessing.Process(target=x, args=[], name=x.__name__) for x in funcs]
 
     pids = [os.getpid()]

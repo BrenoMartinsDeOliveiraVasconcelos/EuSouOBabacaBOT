@@ -13,10 +13,10 @@
   },
   "NO_AGE": {
     "note": "Sem identificador de idade",
-    "body": "Sua publicação foi não possui a idade no teexto. É importante por a idade no texto para fins de ajudar o julgamento. Coloque a idade e o gênero entre parênteses em alguma parte do texto assim: (13M). Substitua o número pela sua idade e a letra pelo seu gênero, sendo: M - mulher, H - homem, N - não binário.\n\n>!NOEDIT!<"
+    "body": "Sua publicação foi removida pois não possui a idade no teexto. É importante por a idade no texto para fins de ajudar o julgamento. Coloque a idade no titulo ou em alguma parte do texto. **RECOMENDADO POSTAR NOVAMENTE** Qualquer duvida, chame [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin)\n\n>!NOEDIT!<"
   },
   "KARMA": {
     "note": "Pouco karma",
-    "body": "Sua publicação foi removida pois você possui pouco karma."
+    "body": "Sua publicação foi removida pois você possui pouco karma. Por favor envie uma mensagem para [JakeWisconsin](https://www.reddit.com/u/JakeWisconsin) para ter seu post revisado. "
   }
 }

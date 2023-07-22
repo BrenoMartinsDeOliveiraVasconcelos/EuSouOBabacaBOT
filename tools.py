@@ -15,8 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+import _io
 import datetime
+import io
+
 
 def logit(msg):
     open("log", "a").write(msg + "\n")
@@ -58,3 +60,23 @@ def log_runtime(func, a: float, b: float):
     # colocar o tempo em minutos
     funct_file.write(f"[{datetime.datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}] Runtime: {(difference_runtime/60)} minutos. \n")
 
+
+def getfiletext(file: io.TextIOWrapper) -> list:
+    '''
+    Consegue o texto de um arquivo e retorna cada linha formatada numa lista
+    :param file: Classe da função open()
+    :return: Lista de strings
+    '''
+
+    indx = -1
+    text = file.readlines()
+    for line in text:
+        indx += 1
+        text[indx] = line.strip()
+
+    indx = 0
+    for line in text:
+        text[indx] = line.removesuffix("\n")
+        indx = 0
+
+    return text
