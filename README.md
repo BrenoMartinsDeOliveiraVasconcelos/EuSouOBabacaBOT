@@ -113,7 +113,7 @@ MEMORY | Mostra o consumo de memória em megabytes
 
 **Tipo** | **Valor**
 --|--
-RAM | 256 mb
+RAM | 512 mb
 CPU | 1 núcelo ou superior
 Python | 3.7+
 Bibliotecas Python | praw, prawcore, psutil
