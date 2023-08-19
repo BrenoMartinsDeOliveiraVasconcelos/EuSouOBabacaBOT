@@ -11,5 +11,6 @@
     <orderEntry type="module" module-name="FC_Installer" />
     <orderEntry type="module" module-name="textwall" />
     <orderEntry type="module" module-name="text2emotion" />
+    <orderEntry type="module" module-name="aoc2scp" />
   </component>
 </module>

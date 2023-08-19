@@ -422,78 +422,60 @@ def verify_user():
             tools.logger(tp=5, ex=traceback.format_exc())
 
 
-def agechecker():
-    '''
-    Checa se tem idade no post
+def censorship():
+    reddit.validate_on_submit = True
+    while True:
+        atime = datetime.datetime.now().timestamp()
+        try:
+            subcount = 0
+            submissons = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
+            censored = json.load(open("censorship.json", "r"))
+            for submission in submissons:
+                time.sleep(5)
+                body = submission.selftext.split(" ")
+                index = 0
+                for w in body:
+                    w = w.replace("\n", "")
+                    w = w.removesuffix("\n")
+                    w = w.removesuffix(".")
 
-    :return: None
-    '''
+                    body[index] = w.upper()
 
-    sublist = tools.getfiletext(open("aid", "r"))
-    rid = tools.getfiletext(open("rid", "r"))
-    submissions = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
+                    if w in censored["terms"]:
+                        submission.mod.remove(mod_note=f"CENSORED", spam=False)
+                        print(f"{submission.id}: post ({w})")
+                    index += 1
 
-    try:
-        while True:
-            a = datetime.datetime.now().timestamp()
-            time.sleep(10)
-            for submission in submissions:
-                if submission.id not in sublist:
-                    open("aid", "a").write(f"{submission.id}\n")
-                    title_body = []
-                    for i in submission.title.split(" "):
-                        title_body.append(i)
+                submission.comment_sort = 'new'
+                submission.comments.replace_more(limit=None)
+                comments = submission.comments.list()
 
-                    for i in submission.selftext.split(" "):
-                        title_body.append(i)
-
+                for com in comments:
                     index = 0
-                    for i in title_body:
-                        title_body[index] = i.replace("\n\n", "")
+                    body = com.body.split(" ")
+                    for w in body:
+                        w = w.replace("\n", "")
+                        w = w.removesuffix("\n")
+                        w = w.removesuffix(".")
+
+                        body[index] = w.upper()
+
+                        if w in censored["terms"]:
+                            com.mod.remove(mod_note=f"CENSORED", spam=False)
+                            print(f"{submission.id}: comentário ({w})")
                         index += 1
 
-                    index = 0
-                    status = True
-                    for word in title_body:
-                        # checar se tem numero na palavra, se tiver quebra tudo
-                        letters = []
-
-                        for l in word:
-                            letters.append(l)
-
-                        place = 0
-                        status = False
-                        for x in letters:
-                            x: str
-                            if x.isnumeric():
-                                status = True
-
-                            place += 1
-
-                        if status:
-                            break
-
-                        index += 1
-
-                    if submission.id not in rid and not status:
-                        reason = reasons["NO_AGE"]
-                        submission.mod.remove(mod_note=reason["note"], spam=False)
-                        submission.reply(body=reason["body"])
-                        tools.logger(tp=4, sub_id=submission.id, reason="Sem idade")
-
-                        open("rid", "a").write(f"{submission.id}\n")
-
-            b = datetime.datetime.now().timestamp()
-            tools.log_runtime(agechecker, a, b)
-    except Exception:
-        tools.logger(tp=5, ex=traceback.format_exc())
+            btime = datetime.datetime.now().timestamp()
+            tools.log_runtime(censorship, atime, btime)
+        except Exception:
+            tools.logger(tp=5, ex=traceback.format_exc())
 
 
 if __name__ == '__main__':
     # Preparar os arquivos
     prep.begin()
 
-    funcs = [runtime, backup, clearlog, textwall, verify_user, agechecker]
+    funcs = [runtime, backup, clearlog, textwall, verify_user, censorship]
     processes = [multiprocessing.Process(target=x, args=[], name=x.__name__) for x in funcs]
 
     pids = [os.getpid()]
