@@ -422,60 +422,11 @@ def verify_user():
             tools.logger(tp=5, ex=traceback.format_exc())
 
 
-def censorship():
-    reddit.validate_on_submit = True
-    while True:
-        atime = datetime.datetime.now().timestamp()
-        try:
-            subcount = 0
-            submissons = reddit.subreddit(config["subreddit"]).new(limit=int(config["submissions"]))
-            censored = json.load(open("censorship.json", "r"))
-            for submission in submissons:
-                time.sleep(5)
-                body = submission.selftext.split(" ")
-                index = 0
-                for w in body:
-                    w = w.replace("\n", "")
-                    w = w.removesuffix("\n")
-                    w = w.removesuffix(".")
-
-                    body[index] = w.upper()
-
-                    if w in censored["terms"]:
-                        submission.mod.remove(mod_note=f"CENSORED", spam=False)
-                        print(f"{submission.id}: post ({w})")
-                    index += 1
-
-                submission.comment_sort = 'new'
-                submission.comments.replace_more(limit=None)
-                comments = submission.comments.list()
-
-                for com in comments:
-                    index = 0
-                    body = com.body.split(" ")
-                    for w in body:
-                        w = w.replace("\n", "")
-                        w = w.removesuffix("\n")
-                        w = w.removesuffix(".")
-
-                        body[index] = w.upper()
-
-                        if w in censored["terms"]:
-                            com.mod.remove(mod_note=f"CENSORED", spam=False)
-                            print(f"{submission.id}: comentário ({w})")
-                        index += 1
-
-            btime = datetime.datetime.now().timestamp()
-            tools.log_runtime(censorship, atime, btime)
-        except Exception:
-            tools.logger(tp=5, ex=traceback.format_exc())
-
-
 if __name__ == '__main__':
     # Preparar os arquivos
     prep.begin()
 
-    funcs = [runtime, backup, clearlog, textwall, verify_user, censorship]
+    funcs = [runtime, backup, clearlog, textwall, verify_user]
     processes = [multiprocessing.Process(target=x, args=[], name=x.__name__) for x in funcs]
 
     pids = [os.getpid()]
