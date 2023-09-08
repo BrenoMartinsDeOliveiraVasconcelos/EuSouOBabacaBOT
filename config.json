@@ -6,11 +6,12 @@
         "creator": "JakeWisconsin",
         "github": "https://github.com/BrenoMartinsDeOliveiraVasconcelos/EuSouOBabacaBOT"
     },
-    "upper_text": "Entre no nosso servidor do Discord! [Clique aqui](https://discord.gg/gKGxKB9SNb)",
-    "submissions": "900",
+    "upper_text": "[Respnde nossa pesquisar por favor? Não custa nada!](https://forms.gle/cvkiQdTJaSg78WSA8)",
+    "submissions": "75",
     "subreddit": "EuSouOBabaca",
     "backup": "/srv/Backup",
     "clear_log": 86400,
+    "break_time": 172800,
     "flairs": {
         "NEOB": ["fad0940c-6841-11ed-baed-365116e43406", 0, "Não é o babaca (e o resto sim)"],
         "EOB": ["e46b8208-6841-11ed-99cd-cec761e4d61c", 0, "É o babaca"],
@@ -25,6 +26,8 @@
         "NOT_CLASSIFIED": ["5462ec04-70c6-11ed-8642-aa07fd483ac4", 2, ""]
     },
     "flairs_ignore": ["INCONCLUSIVE", "NOT_AVALIABLE", "NOT_CLASSIFIED"],
+    "asshole": ["EOB", "TEOB"],
+    "not_asshole": ["NGM", "NEOB", "EOT"],
     "vote_name": ["Não é o babaca", "É o babaca", "É o trouxa", "Não há babacas", "Falta informação", "Todos são babacas", "Falso", 
     "Off-topic"],
     "text_filter": {
