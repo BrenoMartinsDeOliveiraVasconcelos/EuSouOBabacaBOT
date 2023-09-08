@@ -1,3 +1,5 @@
+Movido para https://github.com/BrenoMartinsDeOliveiraVasconcelos/lucasbot/
+
 # 1 - O que é?
 
 Lucas Bot é um bot feito para o subreddit "r/EuSouOBabacaBOT" de forma a suprir a necessidade cálculo de votos das publicações.
